@@ -16,7 +16,7 @@ main: main.o sandwich keyvaults
 crypto-main: crypto_main.o sandwich
 	$(CC) -o $@ $(OSSLLIBS) $(LDFLAGS) $<
 
-crypto-main.o: crypto-main.c
+crypto-main.o: crypto_main.c
 	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
 
 main.o: main.c
