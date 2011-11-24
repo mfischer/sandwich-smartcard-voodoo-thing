@@ -1,7 +1,7 @@
 CC=gcc
 LD=ld
-CFLAGS=-Wall -g -std=c99 -Werror
-LDFLAGS=-L $(PWD) -lsandwich
+CFLAGS=-Wall -std=c99 -Werror -O2
+LDFLAGS=-L $(PWD) -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
