@@ -87,10 +87,10 @@ int write_keyvault_to_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		write (fd, &kv->k_m_1, 16);
-		write (fd, &kv->k_w_1, 16);
-		write (fd, &kv->k_m_2, 16);
-		write (fd, &kv->k, 16);
+		write (fd, kv->k_m_1, 16);
+		write (fd, kv->k_w_1, 16);
+		write (fd, kv->k_m_2, 16);
+		write (fd, kv->k, 16);
 		close (fd);
 	}
 	printf ("Writing keyvault to file %s\n", filename);
@@ -105,13 +105,13 @@ int init_keyvault_from_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		if (read (fd, &kv->k_m_1, 16) != 16)
+		if (read (fd, kv->k_m_1, 16) != 16)
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, &kv->k_w_1, 16) != 16)
+		if (read (fd, kv->k_w_1, 16) != 16)
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, &kv->k_m_2, 16) != 16)
+		if (read (fd, kv->k_m_2, 16) != 16)
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, &kv->k, 16) != 16)
+		if (read (fd, kv->k, 16) != 16)
 			fprintf (stderr, "Read error while reading keyvault\n");
 		close (fd);
 	}
