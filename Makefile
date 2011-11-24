@@ -1,26 +1,47 @@
-CC=clang
-CFLAGS=-Wall -g -std=c99
+CC=gcc
+LD=ld
+CFLAGS=-Wall -g -std=c99 -Werror
+LDFLAGS=-L $(PWD) -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
-FREEFARELIBS=$(shell pkg-config --libs libfreefare)
-OPENSSLLIBS=$(shell pkg-config --libs openssl)
+FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
+OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: main log.o crypto
+default: main crypto-main
 
-main: main.c log.o
-	$(CC) -o main $(CFLAGS) $(FREEFARECFLAGS) $(FREEFARELIBS) $^
 
-log.o: log.c
-	$(CC) -c -o $@ $(CFLAGS) $(LIBS) $<
+## Our main applications
+main: main.o sandwich
+	$(CC) -o $@ $(FREEFARELIBS) $(LDFLAGS) $<
 
-crypto: crypto.c
-	$(CC) -o $@ $(CFLAGS) $(LIBS) $(OPENSSLLIBS) $<
+crypto-main: crypto_main.o sandwich
+	$(CC) -o $@ $(OSSLLIBS) $(LDFLAGS) $<
+
+crypto-main.o: crypto-main.c
+	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
+
+main.o: main.c
+	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
+
+## Our own library
+setup.o: setup.c setup.h
+	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
+
+log.o: log.c log.h
+	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
+
+crypto.o: crypto.c crypto.h
+	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
+
+sandwich: crypto.o log.o setup.o
+	$(LD) -shared -o libsandwich.so -lc $^ $(OSSLLIBS) $(FREEFARELIBS)
 
 .PHONY: clean
-
 clean:
 	-rm main
-	-rm crypto
+	-rm crypto-main
 	-rm *.o
+	-rm *.so
+
 
 #-rm *.so
 #-rm *.py
