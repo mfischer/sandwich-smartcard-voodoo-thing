@@ -10,7 +10,7 @@ default: main crypto-main
 
 
 ## Our main applications
-main: main.o sandwich
+main: main.o sandwich keyvaults
 	$(CC) -o $@ $(FREEFARELIBS) $(LDFLAGS) $<
 
 crypto-main: crypto_main.o sandwich
@@ -35,12 +35,16 @@ crypto.o: crypto.c crypto.h
 sandwich: crypto.o log.o setup.o
 	$(LD) -shared -o libsandwich.so -lc $^ $(OSSLLIBS) $(FREEFARELIBS)
 
+keyvaults:
+	-mkdir keyvaults
+
 .PHONY: clean
 clean:
 	-rm main
 	-rm crypto-main
 	-rm *.o
 	-rm *.so
+	-rm -r keyvaults
 
 
 #-rm *.so
