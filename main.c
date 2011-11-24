@@ -29,6 +29,11 @@ void generate_keys ()
 
 int main (int argc, char** argv)
 {
+	if (argc < 2)
+	{
+		printf ("Usage:\n%s private_key.pem shop_private_key.pem\n", argv[0]);
+		return EXIT_FAILURE;
+	}
 	nfc_device_t *device = NULL;
 	int error = EXIT_SUCCESS;
 	int res;
@@ -77,6 +82,7 @@ int main (int argc, char** argv)
 	create_applications (tags[0]);
 	create_files (tags[0]);
 	setup_keys (tags[0], kv);
+	write_encrypted_tag_key (tags[0], kv, argv[1], argv[2], 16);
 
 	/* Test stuff a bit */
 	/*int32_t val = 0;*/
