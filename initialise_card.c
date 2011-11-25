@@ -79,6 +79,7 @@ int main (int argc, char** argv)
 	strncat (filename, "keyvaults/kv-", 255);
 	strncat (filename, tag_uid, 255);
 	write_keyvault_to_file (filename, kv);
+	free(tag_uid);
 
 	if (DESFIRE != freefare_get_tag_type (tags[0]))
 	{

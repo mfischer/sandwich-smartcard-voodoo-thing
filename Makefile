@@ -40,7 +40,7 @@ keyvaults:
 
 .PHONY: clean
 clean:
-	-rm initialise_card
+	-rm initialise-card
 	-rm crypto-main
 	-rm *.o
 	-rm *.so
