@@ -167,8 +167,18 @@ int setup_keys (MifareTag tag, keyvault_t *kv)
 	if (res < 0)
 		errx (EXIT_FAILURE, "Authentication to application 1 failed");
 
-	printf ("Setting 3DES key K_M1 ...\n");
-	MifareDESFireKey new_key = mifare_desfire_3des_key_new_with_version (kv->k_m_1);
+	MifareDESFireKey new_key;
+	if (get_keytype_3DES (kv, CRYPTO_KEY_KM1))
+	{
+		printf ("Setting 3DES key K_M1 ...\n");
+		new_key = mifare_desfire_3des_key_new_with_version (kv->k_m_1);
+	}
+	else
+	{
+		printf ("Setting DES key K_M1 ...\n");
+		new_key = mifare_desfire_des_key_new_with_version (kv->k_m_1);
+	}
+
 	res = mifare_desfire_change_key (tag, 0x00, new_key, old_key);
 	if (res < 0)
 		freefare_perror (tag, "Change key 0x00");
@@ -179,8 +189,16 @@ int setup_keys (MifareTag tag, keyvault_t *kv)
 
 	mifare_desfire_key_free (new_key);
 
-	printf ("Setting 3DES key K_W1 ...\n");
-	new_key = mifare_desfire_3des_key_new_with_version (kv->k_w_1);
+	if (get_keytype_3DES (kv, CRYPTO_KEY_KW1))
+	{
+		printf ("Setting 3DES key K_W1 ...\n");
+		new_key = mifare_desfire_3des_key_new_with_version (kv->k_w_1);
+	}
+	else
+	{
+		printf ("Setting DES key K_W1 ...\n");
+		new_key = mifare_desfire_des_key_new_with_version (kv->k_w_1);
+	}
 	res = mifare_desfire_change_key (tag, 0x01, new_key, old_key);
 	if (res < 0)
 		freefare_perror (tag, "Change key 0x01");
@@ -198,8 +216,16 @@ int setup_keys (MifareTag tag, keyvault_t *kv)
 	if (res < 0)
 		errx (EXIT_FAILURE, "Authentication to application 2 failed");
 
-	printf ("Setting 3DES key K_M2 ...\n");
-	new_key = mifare_desfire_3des_key_new_with_version (kv->k_m_2);
+	if (get_keytype_3DES (kv, CRYPTO_KEY_KM2))
+	{
+		printf ("Setting 3DES key K_M2 ...\n");
+		new_key = mifare_desfire_3des_key_new_with_version (kv->k_m_2);
+	}
+	else
+	{
+		printf ("Setting DES key K_M2 ...\n");
+		new_key = mifare_desfire_des_key_new_with_version (kv->k_m_2);
+	}
 	res = mifare_desfire_change_key (tag, 0x00, new_key, old_key);
 	if (res < 0)
 		freefare_perror (tag, "Change key 0x00");
@@ -210,8 +236,16 @@ int setup_keys (MifareTag tag, keyvault_t *kv)
 
 	mifare_desfire_key_free (new_key);
 
-	printf ("Setting 3DES key K ...\n");
-	new_key = mifare_desfire_3des_key_new_with_version (kv->k_w_1);
+	if (get_keytype_3DES (kv, CRYPTO_KEY_K))
+	{
+		printf ("Setting 3DES key K ...\n");
+		new_key = mifare_desfire_3des_key_new_with_version (kv->k_w_1);
+	}
+	else
+	{
+		printf ("Setting DES key K ...\n");
+		new_key = mifare_desfire_des_key_new_with_version (kv->k_w_1);
+	}
 	res = mifare_desfire_change_key (tag, 0x01, new_key, old_key);
 	if (res < 0)
 		freefare_perror (tag, "Change key 0x01");

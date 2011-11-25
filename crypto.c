@@ -71,12 +71,39 @@ keyvault_t* create_keyvault_new (uint8_t *k_m_1, uint8_t *k_w_1, uint8_t *k_m_2,
 	memcpy (ks->k_w_1, k_w_1, 16 * sizeof (uint8_t));
 	memcpy (ks->k_m_2, k_m_2, 16 * sizeof (uint8_t));
 	memcpy (ks->k, k, 16 * sizeof (uint8_t));
+	ks->version = CRYPTO_CUR_KEYVAULT_VERSION;
 	return ks;
 }
 
 void destroy_keyvault (keyvault_t* kv)
 {
 	free (kv);
+}
+
+void set_keytype_3DES (keyvault_t *kv, uint8_t keyno)
+{
+	kv->keytypes = (0x80 >> keyno) | kv->keytypes;
+}
+
+void set_keytype_DES (keyvault_t *kv, uint8_t keyno)
+{
+	kv->keytypes = ~(0x80 >> keyno) & kv->keytypes;
+}
+
+
+void set_keytype_crypted (keyvault_t *kv, uint8_t keyno)
+{
+	kv->keytypes = (0x08 >> keyno) | kv->keytypes;
+}
+
+void set_keytype_non_crypted (keyvault_t *kv, uint8_t keyno)
+{
+	kv->keytypes = ~(0x08 >> keyno) & kv->keytypes;
+}
+
+uint8_t get_keytype_3DES (keyvault_t *kv, uint8_t keyno)
+{
+	return (0x80 >> keyno) & kv->keytypes;
 }
 
 int write_keyvault_to_file (const char* filename, keyvault_t* kv)
@@ -87,13 +114,15 @@ int write_keyvault_to_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		write (fd, kv->k_m_1, 16);
-		write (fd, kv->k_w_1, 16);
-		write (fd, kv->k_m_2, 16);
-		write (fd, kv->k, 16);
+		write (fd, (const void *) &kv->version, sizeof(uint8_t));
+		write (fd, kv->k_m_1, 16 * sizeof (uint8_t));
+		write (fd, kv->k_w_1, 16 * sizeof (uint8_t));
+		write (fd, kv->k_m_2, 16 * sizeof (uint8_t));
+		write (fd, kv->k, 16 * sizeof (uint8_t));
+		write (fd, (const void *) &kv->keytypes, sizeof (uint8_t));
 		close (fd);
 	}
-	printf ("Writing keyvault to file %s\n", filename);
+	printf ("Writing keyvault to file %s, KV version %02x\n", filename, kv->version);
 	return EXIT_SUCCESS;
 }
 
@@ -105,18 +134,20 @@ int init_keyvault_from_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		if (read (fd, kv->k_m_1, 16) != 16)
+		if (read (fd, (void *) kv->version, sizeof (uint8_t)) != sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, kv->k_w_1, 16) != 16)
+		if (read (fd, kv->k_m_1, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, kv->k_m_2, 16) != 16)
+		if (read (fd, kv->k_w_1, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, kv->k, 16) != 16)
+		if (read (fd, kv->k_m_2, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
+			fprintf (stderr, "Read error while reading keyvault\n");
+		if (read (fd, kv->k, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
+			fprintf (stderr, "Read error while reading keyvault\n");
+		if (read (fd, (void *) kv->keytypes, sizeof (uint8_t)) != sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
 		close (fd);
 	}
 	printf ("Wrote keyvault to file %s\n", filename);
 	return EXIT_SUCCESS;
 }
-
-

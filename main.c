@@ -44,6 +44,16 @@ int main (int argc, char** argv)
 	generate_keys ();
 	keyvault_t* kv = create_keyvault_new (k_m_1, k_w_1, k_m_2, k_tag);
 
+	set_keytype_non_crypted (kv, CRYPTO_KEY_KM1);
+	set_keytype_non_crypted (kv, CRYPTO_KEY_KW1);
+	set_keytype_non_crypted (kv, CRYPTO_KEY_KM2);
+	set_keytype_non_crypted (kv, CRYPTO_KEY_K);
+
+	set_keytype_3DES (kv, CRYPTO_KEY_KM1);
+	set_keytype_3DES (kv, CRYPTO_KEY_KW1);
+	set_keytype_DES (kv, CRYPTO_KEY_KM2);
+	set_keytype_3DES (kv, CRYPTO_KEY_K);
+
 	nfc_list_devices (devices, 1, &device_count);
 	if (!device_count)
 		errx (EXIT_FAILURE, "No NFC device found.");
