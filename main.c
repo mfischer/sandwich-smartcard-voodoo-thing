@@ -44,7 +44,7 @@ int main (int argc, char** argv)
 	generate_keys ();
 	keyvault_t* kv = create_keyvault_new (k_m_1, k_w_1, k_m_2, k_tag);
 
-	nfc_list_devices (devices, 8, &device_count);
+	nfc_list_devices (devices, 1, &device_count);
 	if (!device_count)
 		errx (EXIT_FAILURE, "No NFC device found.");
 	/*else*/
