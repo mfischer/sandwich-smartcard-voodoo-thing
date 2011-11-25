@@ -26,6 +26,7 @@ def main ():
         version, k_m1, k_w1, k_m2, k, kt = struct.unpack_from (fmt, data)
         ls, isCrypted = parse_keytypes (kt)
 
+        print 'File: %s' % sys.argv[1]
         print 8 * '-' + ' Keyvault (ver.: 0x%02x)' % version + 12 * '-'
         print '| K_M1:\t%032s |' % hexlify (k_m1[:ls[0]])
         print '| K_W1:\t%032s |' % hexlify (k_w1[:ls[1]])

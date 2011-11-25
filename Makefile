@@ -6,11 +6,11 @@ FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: main crypto-main
+default: initialise-card crypto-main
 
 
 ## Our main applications
-main: main.o sandwich keyvaults
+initialise-card: initialise_card.o sandwich keyvaults
 	$(CC) -o $@ $(FREEFARELIBS) $(LDFLAGS) $<
 
 crypto-main: crypto_main.o sandwich
@@ -19,7 +19,7 @@ crypto-main: crypto_main.o sandwich
 crypto-main.o: crypto_main.c
 	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
 
-main.o: main.c
+initialise_card.o: initialise_card.c
 	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
 
 ## Our own library
@@ -40,7 +40,7 @@ keyvaults:
 
 .PHONY: clean
 clean:
-	-rm main
+	-rm initialise_card
 	-rm crypto-main
 	-rm *.o
 	-rm *.so
