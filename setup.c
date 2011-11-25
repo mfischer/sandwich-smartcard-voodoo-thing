@@ -116,7 +116,7 @@ int create_files (MifareTag tag)
 
 	/* FIXME: Check the accessrights ... */
 	printf ("Creating std_data_file 0x01...\n");
-	res = mifare_desfire_create_std_data_file(tag, 0x01,0x03,0xE100,0x80);
+	res = mifare_desfire_create_std_data_file(tag, 0x01,0x03,0xe100,0x80);
 	if (res < 0)
 	errx (EXIT_FAILURE, "CreateStdDataFile failed");
 

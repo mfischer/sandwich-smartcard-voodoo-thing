@@ -31,7 +31,7 @@ int main (int argc, char** argv)
 {
 	if (argc < 2)
 	{
-		printf ("Usage:\n%s private_key.pem shop_private_key.pem\n", argv[0]);
+		printf ("Usage:\n%s global_public_key.pem shop_private_key.pem\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	nfc_device_t *device = NULL;
@@ -106,8 +106,6 @@ int main (int argc, char** argv)
 	/*printf ("Value of counter is now %d\n", val);*/
 
 
-	(void) tags;
-	(void) device;
 	(void) res;
 	printf ("Disconnecting ...\n");
 	mifare_desfire_disconnect (tags[0]);
