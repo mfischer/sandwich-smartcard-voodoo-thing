@@ -42,6 +42,7 @@ struct keyvault
 typedef struct keyvault keyvault_t;
 
 keyvault_t* create_keyvault_new (uint8_t *k_m_1, uint8_t *k_w_1, uint8_t *k_m_2, uint8_t *k);
+keyvault_t* create_keyvault_new_empty ();
 void destroy_keyvault (keyvault_t* kv);
 
 void set_keytype_3DES (keyvault_t *kv, uint8_t keyno);

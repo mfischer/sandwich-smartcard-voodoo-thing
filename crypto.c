@@ -75,6 +75,14 @@ keyvault_t* create_keyvault_new (uint8_t *k_m_1, uint8_t *k_w_1, uint8_t *k_m_2,
 	return ks;
 }
 
+keyvault_t* create_keyvault_new_empty ()
+{
+	keyvault_t *ks = (keyvault_t *) malloc (sizeof(keyvault_t));
+	memset ((void*) ks, 0, sizeof(keyvault_t));
+	ks->version = CRYPTO_CUR_KEYVAULT_VERSION;
+	return ks;
+}
+
 void destroy_keyvault (keyvault_t* kv)
 {
 	free (kv);
