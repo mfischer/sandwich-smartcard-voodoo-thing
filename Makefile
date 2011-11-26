@@ -42,18 +42,9 @@ keyvaults:
 clean:
 	-rm initialise-card
 	-rm crypto-main
+	-rm analyse-card
 	-rm *.o
 	-rm *.so
 
 dist-clean:
 	-rm -r keyvaults
-
-
-#-rm *.so
-#-rm *.py
-#-rm *.pyc
-
-#swig: freefare.i
-#swig -python $<
-#$(CC) -fPIC -c freefare_wrap.c $(LIBS) -I /usr/include/python2.7
-#ld -shared freefare_wrap.o -o _freefare.so $(LIBS)
