@@ -11,8 +11,8 @@ uint8_t initial_key[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, const char *sp, size_t len)
 {
 	int res = 0;
-	RSA* global_public = load_key_from_file (gp, 0);
-	RSA* shop_private = load_key_from_file (sp, 1);
+	RSA* global_public = load_key_from_file (gp, CRYPTO_PUBLIC);
+	RSA* shop_private = load_key_from_file (sp, CRYPTO_PRIVATE);
 
 	uint8_t *output = malloc (RSA_size(global_public));
 	res = RSA_public_encrypt (16, (unsigned char*) kv->k, (unsigned char*) output, global_public, RSA_PKCS1_PADDING);
@@ -42,12 +42,14 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, cons
 	ssize_t written = mifare_desfire_write_data (tag, 0x01, 0x0, 0x80, output);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
-	printf ("Wrote %ld bytes E(K) to card ...\n", written);
+	else
+		printf ("Wrote %ld bytes E(K) to card ...\n", written);
 
 	written = mifare_desfire_write_data (tag, 0x02, 0x0, 0x80, signature);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
-	printf ("Wrote %ld bytes Sign(E(K)) to card ...\n", written);
+	else
+		printf ("Wrote %ld bytes Sign(E(K)) to card ...\n", written);
 
 	RSA_free (global_public);
 	RSA_free (shop_private);

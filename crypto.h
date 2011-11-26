@@ -17,6 +17,9 @@
 #define CRYPTO_CRYPTED 0x1
 #define CRYPTO_PLAIN   0x0
 
+#define CRYPTO_PRIVATE 0x1
+#define CRYPTO_PUBLIC 0x0
+
 /* This structure is used to store our keys.
  * The first 4 members are the corresponding keys.
  * The keytypes member is organized as follows:
