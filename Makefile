@@ -46,5 +46,6 @@ clean:
 	-rm *.o
 	-rm *.so
 
+.PHONY: dist-clean
 dist-clean:
 	-rm -r keyvaults
