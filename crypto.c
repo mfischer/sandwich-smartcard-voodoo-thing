@@ -142,7 +142,7 @@ int init_keyvault_from_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		if (read (fd, (void *) kv->version, sizeof (uint8_t)) != sizeof (uint8_t))
+		if (read (fd, (void *) &kv->version, sizeof (uint8_t)) != sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
 		if (read (fd, kv->k_m_1, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
@@ -152,7 +152,7 @@ int init_keyvault_from_file (const char* filename, keyvault_t* kv)
 			fprintf (stderr, "Read error while reading keyvault\n");
 		if (read (fd, kv->k, 16 * sizeof (uint8_t)) != 16 * sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
-		if (read (fd, (void *) kv->keytypes, sizeof (uint8_t)) != sizeof (uint8_t))
+		if (read (fd, (void *) &kv->keytypes, sizeof (uint8_t)) != sizeof (uint8_t))
 			fprintf (stderr, "Read error while reading keyvault\n");
 		close (fd);
 	}

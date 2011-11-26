@@ -241,12 +241,12 @@ int setup_keys (MifareTag tag, keyvault_t *kv)
 	if (get_keytype_3DES (kv, CRYPTO_KEY_K))
 	{
 		printf ("Setting 3DES key K ...\n");
-		new_key = mifare_desfire_3des_key_new_with_version (kv->k_w_1);
+		new_key = mifare_desfire_3des_key_new_with_version (kv->k);
 	}
 	else
 	{
 		printf ("Setting DES key K ...\n");
-		new_key = mifare_desfire_des_key_new_with_version (kv->k_w_1);
+		new_key = mifare_desfire_des_key_new_with_version (kv->k);
 	}
 	res = mifare_desfire_change_key (tag, 0x01, new_key, old_key);
 	if (res < 0)
