@@ -44,6 +44,8 @@ clean:
 	-rm crypto-main
 	-rm *.o
 	-rm *.so
+
+dist-clean:
 	-rm -r keyvaults
 
 
