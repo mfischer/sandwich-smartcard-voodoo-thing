@@ -5,15 +5,15 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
+#include <openssl/x509v3.h>
 
 #include "crypto.h"
-
 
 int main (int argc, char** argv)
 {
 	if (argc !=6)
 	{
-		printf ("Usage:\n %s keyfile.pem\n", argv[0]);
+		printf ("Usage:\n %s keys/private.pem keys/ca_cert.pem keys/shop_cert.pem keys/global_pkey.pem keys/global_pubkey.pem\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	RSA* shop_private = NULL;
@@ -70,5 +70,9 @@ int main (int argc, char** argv)
 	RSA_free(shop_private);
 	X509_free(ca_cert);
 	X509_free(shop_cert);
+	int res = verify_certificate (argv[3], argv[2]);
+	if (res > 0)
+		printf ("Certificate '%s' is signed by CA with certificate '%s'!\n", argv[3], argv[2]);
+
 	return EXIT_SUCCESS;
 }

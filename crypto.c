@@ -10,20 +10,79 @@
 
 #include "crypto.h"
 
-int verify_certificates (X509 *cert, X509 *ca)
+int check (X509_STORE *ctx, const char *file)
 {
-	X509_STORE *store = X509_STORE_new();
-	X509_STORE_CTX *verify_ctx = X509_STORE_CTX_new();
+	X509 *cert = NULL;
+	int res = 0;
+	X509_STORE_CTX *csc;
+	cert = load_cert_from_file (file);
 
-	STACK_OF(X509) *st = sk_X509_new_null();
-	sk_X509_push (st,ca);
-	sk_X509_push (st,cert);
+	if (!cert)
+		return 0;
 
-	X509_STORE_CTX_init(verify_ctx, store, cert ,st);
-	int ret = X509_verify_cert(verify_ctx);
-	sk_X509_free (st);
-	return ret;
+	csc = X509_STORE_CTX_new();
+	if (!csc)
+	{
+		if (cert)
+			X509_free(cert);
+		return 0;
+	}
+
+	X509_STORE_set_flags(ctx, 0);
+	if(!X509_STORE_CTX_init(csc, ctx, cert, 0))
+	{
+		if (cert)
+			X509_free(cert);
+		if (csc)
+			X509_STORE_CTX_free(csc);
+		return 0;
+	}
+	res = X509_verify_cert(csc);
+	X509_STORE_CTX_free(csc);
+	X509_free(cert);
+	return (res > 0);
 }
+
+int verify_certificate (const char* certfile, const char* ca_cert)
+{
+	X509_STORE *cert_ctx=NULL;
+	X509_LOOKUP *lookup=NULL;
+
+	cert_ctx=X509_STORE_new();
+	if (!cert_ctx)
+		return 0;
+
+	OpenSSL_add_all_algorithms();
+
+	lookup=X509_STORE_add_lookup(cert_ctx,X509_LOOKUP_file());
+	if (!lookup)
+	{
+		if (cert_ctx)
+			X509_STORE_free(cert_ctx);
+		return 0;
+	}
+
+	if(!X509_LOOKUP_load_file(lookup,ca_cert,X509_FILETYPE_PEM))
+	{
+		if (cert_ctx)
+			X509_STORE_free(cert_ctx);
+		return 0;
+	}
+
+	lookup=X509_STORE_add_lookup(cert_ctx,X509_LOOKUP_hash_dir());
+	if (!lookup)
+	{
+		if (cert_ctx)
+			X509_STORE_free(cert_ctx);
+		return 0;
+	}
+
+	X509_LOOKUP_add_dir(lookup,NULL,X509_FILETYPE_DEFAULT);
+
+	return check(cert_ctx, certfile);
+}
+
+
 
 RSA* load_key_from_file (const char *filename, int private)
 {

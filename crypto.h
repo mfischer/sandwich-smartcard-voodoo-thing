@@ -64,5 +64,8 @@ RSA* load_key_from_file (const char *filename, int private);
 int generate_random_key (uint8_t* buf, int len);
 
 
+int verify_certificate (const char* certfile, const char* ca_cert);
+
+
 
 #endif /* CRYPTO_H */
