@@ -1,3 +1,3 @@
 #!/bin/sh
-echo -n 'Setting LD_LIBRARY_PATH to '; echo $PWD
-export LD_LIBRARY_PATH=$PWD
+echo -n 'Setting LD_LIBRARY_PATH to '; echo $PWD/lib
+export LD_LIBRARY_PATH=$PWD/lib
