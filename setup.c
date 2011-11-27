@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <err.h>
 
-#include "setup.h"
-#include "crypto.h"
+#include <sandwich/setup.h>
+#include <sandwich/crypto.h>
 
 
 uint8_t initial_key[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

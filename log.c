@@ -3,7 +3,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "log.h"
+#include <sandwich/log.h>
 
 wchar_t *generate_log (wchar_t *shop_name)
 {

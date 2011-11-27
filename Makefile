@@ -1,6 +1,6 @@
 CC=gcc
 LD=ld
-CFLAGS=-Wall -std=c99 -Werror -O2
+CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include
 LDFLAGS=-L $(PWD) -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
@@ -23,13 +23,13 @@ initialise_card.o: initialise_card.c
 	$(CC) -c -o $@ $(CFLAGS) $(FREEFARECFLAGS) $<
 
 ## Our own library
-setup.o: setup.c setup.h
+setup.o: setup.c include/sandwich/setup.h
 	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
 
-log.o: log.c log.h
+log.o: log.c include/sandwich/log.h
 	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
 
-crypto.o: crypto.c crypto.h
+crypto.o: crypto.c include/sandwich/crypto.h
 	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
 
 sandwich: crypto.o log.o setup.o
@@ -42,7 +42,6 @@ keyvaults:
 clean:
 	-rm initialise-card
 	-rm crypto-main
-	-rm analyse-card
 	-rm *.o
 	-rm *.so
 
