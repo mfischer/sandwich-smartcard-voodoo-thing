@@ -30,11 +30,17 @@ void generate_keys ()
 
 int main (int argc, char** argv)
 {
-	if (argc != 4)
+	if (argc != 5)
 	{
-		printf ("Usage:\n%s keys/global_public_key.pem keys/shop_private_key.pem keys/shop_public.pem\n", argv[0]);
+		printf ("Usage:\n%s keys/global_public.pem keys/global_private.pem keys/shop_public.pem keys/shop_private.pem\n", argv[0]);
 		return EXIT_FAILURE;
 	}
+
+	RSA* global_public = load_key_from_file (argv[1], CRYPTO_PUBLIC);
+	RSA* global_private = load_key_from_file (argv[2], CRYPTO_PRIVATE);
+	RSA* shop_public = load_key_from_file (argv[3], CRYPTO_PUBLIC);
+	RSA* shop_private = load_key_from_file (argv[4], CRYPTO_PRIVATE);
+
 	nfc_device_t *device = NULL;
 	int error = EXIT_SUCCESS;
 	int res;
@@ -92,7 +98,7 @@ int main (int argc, char** argv)
 	create_applications (tags[0]);
 	create_files (tags[0]);
 	setup_keys (tags[0], kv);
-	write_encrypted_tag_key (tags[0], kv, argv[1], argv[2], argv[3], 16);
+	write_encrypted_tag_key (tags[0], kv, global_public, shop_public, shop_private, 16);
 
 	/* Test stuff a bit */
 	/*int32_t val = 0;*/
@@ -122,5 +128,10 @@ int main (int argc, char** argv)
 	freefare_free_tags (tags);
 	nfc_disconnect (device);
 	destroy_keyvault (kv);
+	RSA_free (global_public);
+	RSA_free (global_private);
+	RSA_free (shop_private);
+	RSA_free (shop_public);
+
 	return error;
 }

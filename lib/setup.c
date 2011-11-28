@@ -10,11 +10,9 @@
 
 uint8_t initial_key[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, const char *sp, const char *spu, size_t len)
+int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, RSA *global_public, RSA *shop_public, RSA *shop_private, size_t len)
 {
 	int res = 0;
-	RSA* global_public = load_key_from_file (gp, CRYPTO_PUBLIC);
-	RSA* shop_private = load_key_from_file (sp, CRYPTO_PRIVATE);
 
 	uint8_t *crypted = malloc (RSA_size(global_public));
 	res = RSA_public_encrypt (16, (unsigned char*) kv->k, (unsigned char*) crypted, global_public, RSA_PKCS1_PADDING);
@@ -30,8 +28,7 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, cons
 	if (res <= 0)
 		fprintf (stderr, "Something went wrong while signing\n");
 
-	RSA* shop_pubkey = load_key_from_file (spu, CRYPTO_PUBLIC);
-	res = RSA_verify (NID_sha1, (unsigned char*) digest, digestlen, (unsigned char *) signature, siglen, shop_pubkey);
+	res = RSA_verify (NID_sha1, (unsigned char*) digest, digestlen, (unsigned char *) signature, siglen, shop_public);
 	if (res <= 0)
 		fprintf (stderr, "Something went wrong while signing, can't verify the thing with our pubkey\n");
 
@@ -62,9 +59,6 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, cons
 	else
 		printf ("Wrote %ld bytes Sign(E(K)) to card ...\n", written);
 
-	RSA_free (global_public);
-	RSA_free (shop_private);
-	RSA_free (shop_pubkey);
 	free (crypted);
 	free (signature);
 	free (digest);

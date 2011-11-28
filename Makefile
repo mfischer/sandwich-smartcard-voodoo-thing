@@ -11,7 +11,7 @@ default: initialise-card analyse-card crypto-main
 
 ## Our main applications
 initialise-card: apps/initialise_card.o sandwich keyvaults
-	$(CC) -o apps/$@ $(FREEFARELIBS) $(LDFLAGS) $<
+	$(CC) -o apps/$@ $(FREEFARELIBS) $(OSSLLIBS) $(LDFLAGS) $<
 
 initialise_card.o: apps/initialise_card.c
 	$(CC) -c -o apps/$@ $(CFLAGS) $(FREEFARECFLAGS) $<
