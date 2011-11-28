@@ -10,6 +10,19 @@
 
 #include <sandwich/crypto.h>
 
+unsigned char* digest_message (uint8_t *message, unsigned int *len)
+{
+	EVP_MD_CTX mdctx;
+	const EVP_MD *md = EVP_sha1();
+	unsigned char *digest = (unsigned char* ) malloc (sizeof(unsigned char) * EVP_MAX_MD_SIZE);
+	EVP_MD_CTX_init(&mdctx);
+	EVP_DigestInit_ex(&mdctx, md, NULL);
+	EVP_DigestUpdate(&mdctx, (char *) message, *len);
+	EVP_DigestFinal_ex(&mdctx, digest, (unsigned int *) len);
+	EVP_MD_CTX_cleanup(&mdctx);
+	return digest;
+}
+
 int check (X509_STORE *ctx, const char *file)
 {
 	X509 *cert = NULL;

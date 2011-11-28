@@ -67,12 +67,40 @@ int main (int argc, char** argv)
 
 	free (final_output);
 	free (output);
-	RSA_free(shop_private);
-	X509_free(ca_cert);
-	X509_free(shop_cert);
 	int res = verify_certificate (argv[3], argv[2]);
 	if (res > 0)
 		printf ("Certificate '%s' is signed by CA with certificate '%s'!\n", argv[3], argv[2]);
+
+
+	uint8_t k_tag[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xee };
+	uint8_t *crypted = malloc (RSA_size(global_public));
+	res = RSA_public_encrypt (16, k_tag, (unsigned char*) crypted, global_public, RSA_PKCS1_PADDING);
+	if (res < 0)
+		fprintf (stderr, "Something went wrong while ciphering\n");
+	printf ("Encrypted key has length %d\n", RSA_size(global_public));
+
+	unsigned int digestlen;
+	unsigned char *digest = digest_message (crypted, &digestlen);
+	uint8_t *signature = malloc (RSA_size(shop_private));
+	res = RSA_sign (NID_sha1, digest, digestlen,  (unsigned char *) signature, &siglen , shop_private);
+	if (res <= 0)
+	{
+		fprintf (stderr, "Something went wrong while signing\n");
+		long err = ERR_peek_last_error();	
+		const char* errbuf = ERR_reason_error_string(err);
+		fprintf (stderr, "Error: %s\n", errbuf);
+	}
+
+	RSA* our_pubkey = load_key_from_file ("/home/moe/code/sandbox/libfreefare/keys/myPubKey.pem", CRYPTO_PUBLIC);
+	res = RSA_verify (NID_sha1, (unsigned char*) digest, digestlen, (unsigned char *) signature, siglen, our_pubkey);
+	if (res <= 0)
+		fprintf (stderr, "Something went wrong while signing, can't verify the thing with our pubkey\n");
+	free(signature);
+	free (digest);
+	RSA_free(shop_private);
+	X509_free(ca_cert);
+	X509_free(shop_cert);
+
 
 	return EXIT_SUCCESS;
 }

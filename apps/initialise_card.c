@@ -30,9 +30,9 @@ void generate_keys ()
 
 int main (int argc, char** argv)
 {
-	if (argc < 2)
+	if (argc != 4)
 	{
-		printf ("Usage:\n%s global_public_key.pem shop_private_key.pem\n", argv[0]);
+		printf ("Usage:\n%s keys/global_public_key.pem keys/shop_private_key.pem keys/shop_public.pem\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	nfc_device_t *device = NULL;
@@ -58,8 +58,6 @@ int main (int argc, char** argv)
 	nfc_list_devices (devices, 1, &device_count);
 	if (!device_count)
 		errx (EXIT_FAILURE, "No NFC device found.");
-	/*else*/
-		/*printf ("Found %lu devices\n", device_count);*/
 
 	device = nfc_connect (devices);
 	if (!device)
@@ -78,7 +76,7 @@ int main (int argc, char** argv)
 	char filename[255];
 	memset (filename, 0, 255);
 	strncat (filename, "keyvaults/kv-", 255);
-	strncat (filename, tag_uid, 255);
+	strncat (filename, tag_uid, 230);
 	write_keyvault_to_file (filename, kv);
 	free(tag_uid);
 
@@ -94,7 +92,7 @@ int main (int argc, char** argv)
 	create_applications (tags[0]);
 	create_files (tags[0]);
 	setup_keys (tags[0], kv);
-	write_encrypted_tag_key (tags[0], kv, argv[1], argv[2], 16);
+	write_encrypted_tag_key (tags[0], kv, argv[1], argv[2], argv[3], 16);
 
 	/* Test stuff a bit */
 	/*int32_t val = 0;*/
@@ -118,7 +116,6 @@ int main (int argc, char** argv)
 	/*printf ("Value of counter is now %d\n", val);*/
 
 
-	(void) res;
 	printf ("Disconnecting ...\n");
 	mifare_desfire_disconnect (tags[0]);
 

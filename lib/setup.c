@@ -2,29 +2,40 @@
 #include <stdio.h>
 #include <err.h>
 
+#include <openssl/err.h>
+
 #include <sandwich/setup.h>
 #include <sandwich/crypto.h>
 
 
 uint8_t initial_key[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, const char *sp, size_t len)
+int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, const char *sp, const char *spu, size_t len)
 {
 	int res = 0;
 	RSA* global_public = load_key_from_file (gp, CRYPTO_PUBLIC);
 	RSA* shop_private = load_key_from_file (sp, CRYPTO_PRIVATE);
 
-	uint8_t *output = malloc (RSA_size(global_public));
-	res = RSA_public_encrypt (16, (unsigned char*) kv->k, (unsigned char*) output, global_public, RSA_PKCS1_PADDING);
+	uint8_t *crypted = malloc (RSA_size(global_public));
+	res = RSA_public_encrypt (16, (unsigned char*) kv->k, (unsigned char*) crypted, global_public, RSA_PKCS1_PADDING);
 	if (res < 0)
 		fprintf (stderr, "Something went wrong while ciphering\n");
 	printf ("Encrypted key has length %d\n", RSA_size(global_public));
 
-	unsigned int siglen;
-	uint8_t *signature = malloc (RSA_size(shop_private));
-	res = RSA_sign (NID_sha1, (unsigned char*) output, RSA_size(global_public),  (unsigned char*) signature, &siglen , shop_private);
-	if (res < 0)
+	unsigned int siglen = RSA_size (shop_private);
+	unsigned int digestlen = RSA_size(global_public);
+	unsigned char *digest = digest_message (crypted, &digestlen);
+	uint8_t *signature = malloc (siglen);
+	res = RSA_sign (NID_sha1, digest, digestlen,  (unsigned char *) signature, &siglen , shop_private);
+	if (res <= 0)
 		fprintf (stderr, "Something went wrong while signing\n");
+
+	RSA* shop_pubkey = load_key_from_file (spu, CRYPTO_PUBLIC);
+	res = RSA_verify (NID_sha1, (unsigned char*) digest, digestlen, (unsigned char *) signature, siglen, shop_pubkey);
+	if (res <= 0)
+		fprintf (stderr, "Something went wrong while signing, can't verify the thing with our pubkey\n");
+
+
 
 	MifareDESFireAID aid = mifare_desfire_aid_new (0x1);
 	res = mifare_desfire_select_application(tag, aid);
@@ -39,7 +50,7 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, cons
 		freefare_perror(tag, "Authentication to application #1 failed");
 	mifare_desfire_key_free (key);
 
-	ssize_t written = mifare_desfire_write_data (tag, 0x01, 0x0, 0x80, output);
+	ssize_t written = mifare_desfire_write_data (tag, 0x01, 0x0, 0x80, crypted);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
 	else
@@ -53,8 +64,10 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, const char *gp, cons
 
 	RSA_free (global_public);
 	RSA_free (shop_private);
-	free (output);
+	RSA_free (shop_pubkey);
+	free (crypted);
 	free (signature);
+	free (digest);
 	return res;
 }
 
@@ -118,13 +131,13 @@ int create_files (MifareTag tag)
 
 	/* FIXME: Check the accessrights ... */
 	printf ("Creating std_data_file 0x01...\n");
-	res = mifare_desfire_create_std_data_file(tag, 0x01,0x03,0xe100,0x80);
+	res = mifare_desfire_create_std_data_file(tag, 0x01,0x03,0xe1ff,0x80);
 	if (res < 0)
 	errx (EXIT_FAILURE, "CreateStdDataFile failed");
 
 	/* FIXME: Check the accessrights (See section 3.3 of the datasheet)... */
 	printf ("Creating std_data_file 0x02...\n");
-	res = mifare_desfire_create_std_data_file(tag, 0x02,0x03,0xf111,0x80);
+	res = mifare_desfire_create_std_data_file(tag, 0x02,0x03,0xe111,0x80);
 	if (res < 0)
 		errx (EXIT_FAILURE, "CreateStdDataFile failed");
 
@@ -142,13 +155,13 @@ int create_files (MifareTag tag)
 
 	/* FIXME: Check the accessrights ... */
 	printf ("Creating value file 0x01...\n");
-	res = mifare_desfire_create_value_file(tag, 0x01, 0x03, 0xE000, 0x0, 0x0fffffff, 0x0, 0x00);
+	res = mifare_desfire_create_value_file(tag, 0x01, 0x03, 0xe110, 0x0, 0x0fffffff, 0x0, 0x00);
 	if (res < 0)
 		errx (EXIT_FAILURE, "CreateValueFile failed");
 
 	/* FIXME: Check the accessrights ... */
 	printf ("Creating linear record file 0x02...\n");
-	res = mifare_desfire_create_linear_record_file(tag, 0x02, 0x03, 0xE000, 0xc8, 0xa);
+	res = mifare_desfire_create_linear_record_file(tag, 0x02, 0x03, 0xf110, 0xc8, 0xa);
 	if (res < 0)
 		errx (EXIT_FAILURE, "CreateLinearRecordFile failed");
 
