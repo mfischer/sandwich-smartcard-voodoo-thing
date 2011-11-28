@@ -1,19 +1,18 @@
+#include <stdio.h>
 #include <stdlib.h>
-#include <wchar.h>
 #include <sys/time.h>
 #include <time.h>
+#include <inttypes.h>
+#include <string.h>
 
 #include <sandwich/log.h>
 
-wchar_t *generate_log (wchar_t *shop_name)
+void generate_log (char *shop_name, uint32_t count, char* logentry)
 {
 	time_t cur = time (NULL);
+	memset (logentry, 0, LOG_MAX_LEN);
 	struct tm *tm_ptr = localtime ((const time_t *) &cur);
-	wchar_t ret[200];
-	/* FIXME get right length here */
-	swprintf (ret, 200, L"%02d%02d%02d%02d%02d%04d%058S",
-						-2000 + 1900 + tm_ptr->tm_year, tm_ptr->tm_mon, tm_ptr->tm_mday,
-						 tm_ptr->tm_hour, tm_ptr->tm_min, 42, shop_name);
-	wprintf (L"%S\n", ret);
-	return NULL;
+	snprintf (logentry, LOG_MAX_LEN, "%02d%02d%02d%02d%02d%04d%s",
+			-2000 + 1900 + tm_ptr->tm_year, tm_ptr->tm_mon, tm_ptr->tm_mday,
+			tm_ptr->tm_hour, tm_ptr->tm_min, count, shop_name);
 }

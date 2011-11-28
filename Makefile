@@ -38,7 +38,10 @@ log: lib/log.c include/sandwich/log.h
 crypto: lib/crypto.c include/sandwich/crypto.h
 	$(CC) -fPIC -c -o lib/$@.o $(CFLAGS) $<
 
-sandwich: crypto log setup
+shop: lib/shop.c include/sandwich/shop.h
+	$(CC) -fPIC -c -o lib/$@.o $(CFLAGS) $<
+
+sandwich: crypto log setup shop
 	$(LD) -shared -o lib/libsandwich.so -lc lib/*.o $(OSSLLIBS) $(FREEFARELIBS)
 
 keyvaults:
