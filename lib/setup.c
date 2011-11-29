@@ -148,14 +148,14 @@ int create_files (MifareTag tag)
 	mifare_desfire_key_free (key);
 
 	/* FIXME: Check the accessrights ... */
-	printf ("Creating value file 0x01...\n");
-	res = mifare_desfire_create_value_file(tag, 0x01, 0x03, 0xe110, 0x0, 0x0fffffff, 0x0, 0x00);
+	printf ("Creating std_data_file 0x01...\n");
+	res = mifare_desfire_create_std_data_file(tag, 0x01,0x03, 0xe110, 0x20);
 	if (res < 0)
 		errx (EXIT_FAILURE, "CreateValueFile failed");
 
 	/* FIXME: Check the accessrights ... */
-	printf ("Creating linear record file 0x02...\n");
-	res = mifare_desfire_create_linear_record_file(tag, 0x02, 0x03, 0xf110, 0xc8, 0xa);
+	printf ("Creating std_data_file 0x02...\n");
+	res = mifare_desfire_create_std_data_file(tag, 0x02,0x03, 0xf110, 0x7e0);
 	if (res < 0)
 		errx (EXIT_FAILURE, "CreateLinearRecordFile failed");
 

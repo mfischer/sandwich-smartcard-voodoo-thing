@@ -3,7 +3,7 @@
 
 #include <freefare.h>
 
-#include "crypto.h"
+#include <sandwich/crypto.h>
 
 int erase_card (MifareTag tag);
 int create_applications (MifareTag tag);
