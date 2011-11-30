@@ -181,12 +181,12 @@ void set_keytype_non_crypted (keyvault_t *kv, uint8_t keyno)
 	kv->keytypes = ~(0x08 >> keyno) & kv->keytypes;
 }
 
-uint8_t get_keytype_3DES (keyvault_t *kv, uint8_t keyno)
+uint8_t get_keytype_3DES (const keyvault_t *kv, uint8_t keyno)
 {
 	return (0x80 >> keyno) & kv->keytypes;
 }
 
-int write_keyvault_to_file (const char* filename, keyvault_t* kv)
+int write_keyvault_to_file (const char* filename, const keyvault_t* kv)
 {
 	/* FIXME: Encrypt this first */
 	int fd = creat (filename, S_IRUSR | S_IWUSR);
@@ -194,12 +194,15 @@ int write_keyvault_to_file (const char* filename, keyvault_t* kv)
 		fprintf (stderr, "Could not open file %s\n", filename);
 	else
 	{
-		write (fd, (const void *) &kv->version, sizeof(uint8_t));
-		write (fd, kv->k_m_1, 16 * sizeof (uint8_t));
-		write (fd, kv->k_w_1, 16 * sizeof (uint8_t));
-		write (fd, kv->k_m_2, 16 * sizeof (uint8_t));
-		write (fd, kv->k, 16 * sizeof (uint8_t));
-		write (fd, (const void *) &kv->keytypes, sizeof (uint8_t));
+		/* FIXME: handle errors here ... */
+		ssize_t res;
+		res = write (fd, (const void *) &(kv->version), sizeof(uint8_t));
+		res = write (fd, kv->k_m_1, 16 * sizeof (uint8_t));
+		res = write (fd, kv->k_w_1, 16 * sizeof (uint8_t));
+		res = write (fd, kv->k_m_2, 16 * sizeof (uint8_t));
+		res = write (fd, kv->k, 16 * sizeof (uint8_t));
+		res = write (fd, (const void *) &(kv->keytypes), sizeof (uint8_t));
+		(void) res;
 		close (fd);
 	}
 	printf ("Writing keyvault to file %s, KV version %02x\n", filename, kv->version);

@@ -10,6 +10,7 @@
 #include <sandwich/log.h>
 #include <sandwich/setup.h>
 #include <sandwich/crypto.h>
+#include <sandwich/shop.h>
 
 uint8_t k_m_1[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 uint8_t k_w_1[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xee };
@@ -99,28 +100,9 @@ int main (int argc, char** argv)
 	create_files (tags[0]);
 	setup_keys (tags[0], kv);
 	write_encrypted_tag_key (tags[0], kv, global_public, shop_public, shop_private, 16);
-
-	/* Test stuff a bit */
-	/*int32_t val = 0;*/
-	/*res = mifare_desfire_get_value(tags[0], 0x01, &val);*/
-	/*if (res < 0)*/
-		/*errx (EXIT_FAILURE, "Getting value failed");*/
-	/*printf ("Value of counter is %d\n", val);*/
-
-	/*printf ("Increasing value of the counter by 1\n");*/
-	/*res = mifare_desfire_credit(tags[0], 0x01, 0x1);*/
-	/*if (res < 0)*/
-		/*errx (EXIT_FAILURE, "Increasing value failed");*/
-
-	/*res = mifare_desfire_commit_transaction (tags[0]);*/
-	/*if (res < 0)*/
-		/*errx (EXIT_FAILURE, "Commiting transaction failed");*/
-
-	/*res = mifare_desfire_get_value(tags[0], 0x01, &val);*/
-	/*if (res < 0)*/
-		/*errx (EXIT_FAILURE, "Getting value failed");*/
-	/*printf ("Value of counter is now %d\n", val);*/
-
+	update_counter (tags[0], kv, 42);
+	uint32_t val = read_counter (tags[0], kv);
+	printf ("Counter value read from the tag is: %u\n", val);
 
 	printf ("Disconnecting ...\n");
 	mifare_desfire_disconnect (tags[0]);
@@ -128,10 +110,10 @@ int main (int argc, char** argv)
 	freefare_free_tags (tags);
 	nfc_disconnect (device);
 	destroy_keyvault (kv);
+	nfc_disconnect (device);
 	RSA_free (global_public);
 	RSA_free (global_private);
 	RSA_free (shop_private);
 	RSA_free (shop_public);
-
 	return error;
 }

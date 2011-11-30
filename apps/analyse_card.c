@@ -72,7 +72,7 @@ int main (int argc, char** argv)
 	printf ("Decrypted %d bytes of K\n", keylen);
 
 	printf ("K is : ");
-	for (size_t i = 0; i < keylen; i++)
+	for (size_t i = 0; i < (size_t) keylen; i++)
 	{
 		printf ("%02x", kv->k[i]);
 	}

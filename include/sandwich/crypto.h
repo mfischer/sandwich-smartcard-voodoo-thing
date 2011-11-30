@@ -51,12 +51,12 @@ void destroy_keyvault (keyvault_t* kv);
 void set_keytype_3DES (keyvault_t *kv, uint8_t keyno);
 void set_keytype_DES (keyvault_t *kv, uint8_t keyno);
 
-uint8_t get_keytype_3DES (keyvault_t *kv, uint8_t keyno);
+uint8_t get_keytype_3DES (const keyvault_t *kv, uint8_t keyno);
 
 void set_keytype_non_crypted (keyvault_t *kv, uint8_t keyno);
 void set_keytype_crypted (keyvault_t *kv, uint8_t keyno);
 
-int write_keyvault_to_file (const char* filename, keyvault_t* kv);
+int write_keyvault_to_file (const char* filename, const keyvault_t* kv);
 int init_keyvault_from_file (const char* filename, keyvault_t* kv);
 
 X509* load_cert_from_file (const char *filename);

@@ -15,7 +15,7 @@ int write_encrypted_tag_key (MifareTag tag, keyvault_t *kv, RSA *global_public, 
 	int res = 0;
 
 	uint8_t *crypted = malloc (RSA_size(global_public));
-	res = RSA_public_encrypt (16, (unsigned char*) kv->k, (unsigned char*) crypted, global_public, RSA_PKCS1_PADDING);
+	res = RSA_public_encrypt (len, (unsigned char*) kv->k, (unsigned char*) crypted, global_public, RSA_PKCS1_PADDING);
 	if (res < 0)
 		fprintf (stderr, "Something went wrong while ciphering\n");
 	printf ("Encrypted key has length %d\n", RSA_size(global_public));
