@@ -22,8 +22,7 @@ wchar_t* our_name = L"Group5andwich";
 void generate_keys ()
 {
 	printf ("FIXME: These are not RANDOM!\nGenerating random keys ...\n");
-	printf ("FIXME: k_m_1 is hardcoded!\n");
-	/*generate_random_key (k_m_1, 16);*/
+	generate_random_key (k_m_1, 16);
 	generate_random_key (k_w_1, 16);
 	generate_random_key (k_m_2, 16);
 	generate_random_key (k_tag, 16);
@@ -107,13 +106,13 @@ int main (int argc, char** argv)
 	printf ("Disconnecting ...\n");
 	mifare_desfire_disconnect (tags[0]);
 
-	freefare_free_tags (tags);
-	nfc_disconnect (device);
 	destroy_keyvault (kv);
 	nfc_disconnect (device);
+	freefare_free_tags (tags);
 	RSA_free (global_public);
 	RSA_free (global_private);
 	RSA_free (shop_private);
 	RSA_free (shop_public);
+	(void) res;
 	return error;
 }

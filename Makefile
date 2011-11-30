@@ -1,6 +1,6 @@
-CC=clang
+CC=gcc
 LD=ld.gold
-CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include
+CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include -g -Wextra
 LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)

@@ -8,7 +8,7 @@ void update_counter (MifareTag tag, const keyvault_t *kv, uint32_t value)
 	int res;
 	char output[32];
 	memset (&output[0], 0, 32 * sizeof (char));
-	sprintf (output, "%04x", value);
+	sprintf (output, "%04u", value);
 
 	MifareDESFireAID aid = mifare_desfire_aid_new (0x2);
 	res = mifare_desfire_select_application(tag, aid);
@@ -62,21 +62,20 @@ uint32_t read_counter (MifareTag tag, const keyvault_t *kv)
 	else
 		printf ("Read %ld bytes from counter ...\n", read);
 	uint32_t ret;
-	sscanf (output, "%x", &ret);
+	sscanf (output, "%u", &ret);
 	return ret;
 }
 
 void write_log (MifareTag tag, const keyvault_t *kv, uint8_t *data, uint32_t count, RSA *shop_private)
 {
 	int res;
-	(void) kv;
-	(void) count;
-	(void) tag;
 	unsigned int digestlen = strlen ((char *) data);
 	unsigned int siglen = RSA_size (shop_private);
 	unsigned char *digest = digest_message (data, &digestlen);
 	res = RSA_sign (NID_sha1, digest, digestlen,  (unsigned char *) data + 72, &siglen , shop_private);
 	if (res <= 0)
 		fprintf (stderr, "Something went wrong while signing\n");
-
+	(void) res;
+	(void) tag;
+	(void) kv;
 }
