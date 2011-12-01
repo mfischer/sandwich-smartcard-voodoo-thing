@@ -99,9 +99,11 @@ int main (int argc, char** argv)
 	create_files (tags[0]);
 	setup_keys (tags[0], kv);
 	write_encrypted_tag_key (tags[0], kv, global_public, shop_public, shop_private, 16);
-	update_counter (tags[0], kv, 42);
+	update_counter (tags[0], kv, 1);
 	uint32_t val = read_counter (tags[0], kv);
 	printf ("Counter value read from the tag is: %u\n", val);
+
+  write_log (tags[0], kv, "group_1", val, shop_private);
 
 	printf ("Disconnecting ...\n");
 	mifare_desfire_disconnect (tags[0]);

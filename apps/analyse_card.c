@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include <nfc/nfc.h>
 #include <freefare.h>
 
 #include <sandwich/crypto.h>
+#include <sandwich/shop.h>
+#include <sandwich/log.h>
 
 uint8_t k_m_1[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 uint8_t k_tag[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -70,6 +74,8 @@ int main (int argc, char** argv)
 	RSA *private = load_key_from_file (argv[1], CRYPTO_PRIVATE);
 	keylen = RSA_private_decrypt (read, (unsigned char *) k_tag_crypted, kv->k, private, RSA_PKCS1_PADDING);
 	printf ("Decrypted %d bytes of K\n", keylen);
+	if (keylen == 16)
+		set_keytype_3DES (kv, CRYPTO_KEY_K);
 
 	printf ("K is : ");
 	for (size_t i = 0; i < (size_t) keylen; i++)
@@ -84,21 +90,24 @@ int main (int argc, char** argv)
 		errx (EXIT_FAILURE, "Application selection failed");
 	free (aid);
 
-	MifareDESFireKey key = mifare_desfire_3des_key_new_with_version (kv->k);
-	mifare_desfire_key_set_version (key, 0x01);
-	res = mifare_desfire_authenticate (tags[0], 1, key);
-	if (res < 0)
-		freefare_perror(tags[0], "Authentication to application #2 failed");
-	else
-	{
-		int32_t val = -1;
-		res = mifare_desfire_get_value(tags[0], 0x01, &val);
-		if (res < 0)
-			errx (EXIT_FAILURE, "Getting value failed");
-		printf ("Value of counter is: %d\n", val);
-	}
+	
+	char logentry[200];
+	uint32_t counter = read_counter (tags[0], kv);
+	uint32_t _counter = (counter >= 10) ? 10 : counter;
+	printf ("Read counter value of %u\n", counter);
+	struct tm tm;
+	char time[128];
+	char shop_name[58];
+	uint32_t count;
+	unsigned char signature[128];
 
-	mifare_desfire_key_free (key);
+	for (size_t i = 0; i < _counter; i++)
+	{
+		read_log_entry (tags[0], kv, i, logentry);
+		parse_logentry (logentry, &tm, shop_name, &count, signature);
+		strftime (time, 128, "%x %X", &tm);
+		printf ("Entry #%lu:\n\tTime: %s\n\tShop: \"%s\"\n\tCount: %u\n", i, time, shop_name, count);
+	}
 
 	(void) error;
 	RSA_free (private);

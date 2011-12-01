@@ -6,7 +6,7 @@ FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: initialise-card analyse-card crypto-main
+default: initialise-card analyse-card crypto-main log_test
 
 
 ## Our main applications
@@ -27,6 +27,9 @@ crypto-main.o: apps/crypto_main.c
 
 analyse_card.o: apps/analyse_card.c
 	$(CC) -c -o apps/$@ $(CFLAGS) $(FREEFARECFLAGS) $<
+
+log_test: apps/log_test.c log
+	$(CC) -o apps/$@ $(CFLAGS) $(OSSLLIBS) $< $(LDFLAGS)
 
 ## Our own library
 setup: lib/setup.c include/sandwich/setup.h
@@ -56,6 +59,7 @@ install:
 clean:
 	-rm apps/initialise-card
 	-rm apps/crypto-main
+	-rm apps/analyse-card
 	-rm apps/*.o
 	-rm lib/*.o
 	-rm lib/*.so
