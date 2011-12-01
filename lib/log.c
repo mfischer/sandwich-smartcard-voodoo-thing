@@ -15,7 +15,7 @@ void generate_log (char *shop_name, uint32_t count, char* logentry, RSA *shop_pr
 	memset (logentry, 0, LOG_MAX_LEN);
 	struct tm *tm_ptr = localtime ((const time_t *) &cur);
 	snprintf (logentry, LOG_MAX_LEN, "%02d%02d%02d%02d%02d%04u%s",
-			-2000 + 1900 + tm_ptr->tm_year, tm_ptr->tm_mon, tm_ptr->tm_mday,
+			-2000 + 1900 + tm_ptr->tm_year, tm_ptr->tm_mon + 1, tm_ptr->tm_mday,
 			tm_ptr->tm_hour, tm_ptr->tm_min, count, shop_name);
 
 	unsigned int digestlen = 72;
