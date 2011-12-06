@@ -102,9 +102,14 @@ RSA* load_key_from_file (const char *filename, int private)
 	FILE* keyfile;
 	RSA* ret = NULL;
 	
+	#ifdef DEBUG
 	printf ("Loading file %s ...\n", filename);
+	#endif
 	if ( !(keyfile = fopen (filename, "r")) )
+	{
 		fprintf (stderr, "Something went wrong when opening file %s\n", filename);
+		return NULL;
+	}
 	if (private)
 		ret = PEM_read_RSAPrivateKey (keyfile, NULL, NULL, NULL);
 	else
@@ -121,7 +126,9 @@ X509* load_cert_from_file (const char *filename)
 {
 	FILE* certfile;
 	X509* ret;
+	#ifdef DEBUG
 	printf ("Loading file %s ...\n", filename);
+	#endif
 	if ( !(certfile = fopen (filename, "r")) )
 		fprintf (stderr, "Something went wrong when opening file %s\n", filename);
 	ret = PEM_read_X509 (certfile, NULL, NULL, NULL);

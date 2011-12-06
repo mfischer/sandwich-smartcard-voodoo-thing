@@ -17,9 +17,9 @@ uint8_t k_tag_crypted[128];
 
 int main (int argc, char** argv)
 {
-	if (argc < 2)
+	if (argc < 3)
 	{
-		printf ("Usage:\n%s global_private.pem\n", argv[0]);
+		printf ("Usage:\n%s keys/global_private.pem keys\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	nfc_device_t *device = NULL;
@@ -91,22 +91,36 @@ int main (int argc, char** argv)
 	free (aid);
 
 	
-	char logentry[200];
+	char logentry[LOG_MAX_LEN + 2 + 6];
 	uint32_t counter = read_counter (tags[0], kv);
-	uint32_t _counter = (counter >= 10) ? 10 : counter;
+	uint32_t _counter = (counter >= LOG_MAX_ENTRIES) ? LOG_MAX_ENTRIES : counter;
 	printf ("Read counter value of %u\n", counter);
 	struct tm tm;
 	char time[128];
-	char shop_name[58];
+	char shop_name[LOG_MAX_SHOP_LEN];
 	uint32_t count;
 	unsigned char signature[128];
+	char shop_keyfile[255];
 
 	for (size_t i = 0; i < _counter; i++)
 	{
 		read_log_entry (tags[0], kv, i, logentry);
 		parse_logentry (logentry, &tm, shop_name, &count, signature);
+		sprintf(shop_keyfile, "%s/public_keys/%s.pem", argv[2], shop_name);
+		RSA *key = load_key_from_file (shop_keyfile, CRYPTO_PUBLIC);
+		int sigok = 0;
+		if (!key)
+			fprintf(stderr, "Could not find / open file for %s (%s)\n", shop_name, shop_keyfile);
+		else
+		{
+			unsigned int digestlen = LOG_PAYLOAD_LEN;
+			unsigned char *digest = digest_message ((uint8_t*) logentry, &digestlen);
+			sigok |= RSA_verify (NID_sha1, digest, digestlen, signature, RSA_size(key) , key);
+			free (digest);
+			free (key);
+		}
 		strftime (time, 128, "%x %X", &tm);
-		printf ("Entry #%lu:\n\tTime: %s\n\tShop: \"%s\"\n\tCount: %u\n", i, time, shop_name, count);
+		printf ("Entry #%lu:\n\tTime: %s\n\tShop: \"%s\"\n\tCount: %u\n\tSignature ok? %s\n", i, time, shop_name, count, (sigok)? "Yes": "No");
 	}
 
 	(void) error;

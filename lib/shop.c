@@ -38,8 +38,9 @@ void update_counter (MifareTag tag, const keyvault_t *kv, uint32_t value)
 uint32_t read_counter (MifareTag tag, const keyvault_t *kv)
 {
 	int res;
-	char output[32];
-	memset (&output[0], '\0', 32);
+	/* FIXME this is a bit much ... anyway ... *should* work with 40 */
+	char output[256];
+	memset (&output[0], 0, 32);
 
 	MifareDESFireAID aid = mifare_desfire_aid_new (0x2);
 	res = mifare_desfire_select_application(tag, aid);
@@ -57,19 +58,21 @@ uint32_t read_counter (MifareTag tag, const keyvault_t *kv)
 	if (res < 0)
 		freefare_perror (tag, "Authenticating to change counter");
 	mifare_desfire_key_free (key);
+	/* FIXME: Why does this overflow output ?! */
 	ssize_t read = mifare_desfire_read_data (tag, 0x1, 0x0, 0x20, output);
 	if (read < 0)
 		freefare_perror(tag, "Reading data from tag");
 	else
 		printf ("Read %ld bytes from counter ...\n", read);
-	uint32_t ret;
-	sscanf (output, "%u", &ret);
+
+	unsigned int ret;
+	sscanf (output, "%4u", &ret);
 	return ret;
 }
 
 void write_log (MifareTag tag, const keyvault_t *kv, char *shop_name, uint32_t count, RSA *shop_private)
 {
-	char data[200];
+	char data[LOG_MAX_LEN];
 	int res;
 	generate_log (shop_name, count, data, shop_private);
 
@@ -90,7 +93,7 @@ void write_log (MifareTag tag, const keyvault_t *kv, char *shop_name, uint32_t c
 		freefare_perror (tag, "Authenticating to change counter");
 	mifare_desfire_key_free (key);
 
-	ssize_t written = mifare_desfire_write_data (tag, 0x02, 0xc8 * ((count-1) % 10), 0xc8, data);
+	ssize_t written = mifare_desfire_write_data (tag, 0x02, LOG_MAX_LEN * ((count-1) % LOG_MAX_ENTRIES), LOG_MAX_LEN, data);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
 	else
@@ -115,7 +118,18 @@ void read_log_entry (MifareTag tag, const keyvault_t *kv, size_t number, char *l
 	if (res < 0)
 		freefare_perror (tag, "Authenticating to read logentries");
 	mifare_desfire_key_free (key);
-	ssize_t read = mifare_desfire_read_data (tag, 0x2, 0xc8 * number, 0xc8, logentry);
+	ssize_t read = mifare_desfire_read_data_ex (tag, 0x2, LOG_MAX_LEN * number, LOG_MAX_LEN, logentry, 0x03);
 	if (read < 0)
 		freefare_perror(tag, "Reading data from tag");
+}
+
+int buy (MifareTag tag, const keyvault_t *kv, char *shop_name , RSA *shop_private)
+{
+	uint32_t count = read_counter (tag, kv);
+	update_counter (tag, kv, count + 1);
+	write_log (tag, kv, shop_name, count +1, shop_private);
+	if (count > LOG_MAX_ENTRIES && (count % LOG_MAX_ENTRIES == 1))
+		return 1;
+	else
+		return 0;
 }

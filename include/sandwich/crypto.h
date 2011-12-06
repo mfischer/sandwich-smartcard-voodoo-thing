@@ -64,7 +64,7 @@ RSA* load_key_from_file (const char *filename, int private);
 int generate_random_key (uint8_t* buf, int len);
 
 
-unsigned char* digest_message (uint8_t *message, unsigned int *len);
+unsigned char *digest_message (uint8_t *message, unsigned int *len);
 int verify_certificate (const char* certfile, const char* ca_cert);
 
 

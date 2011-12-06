@@ -1,12 +1,12 @@
 CC=gcc
 LD=ld.gold
-CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include -g -Wextra
+CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include -g
 LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: initialise-card analyse-card crypto-main log_test
+default: initialise-card analyse-card crypto-main log_test buy
 
 
 ## Our main applications
@@ -28,8 +28,11 @@ crypto-main.o: apps/crypto_main.c
 analyse_card.o: apps/analyse_card.c
 	$(CC) -c -o apps/$@ $(CFLAGS) $(FREEFARECFLAGS) $<
 
-log_test: apps/log_test.c log
+log_test: apps/log_test.c sandwich
 	$(CC) -o apps/$@ $(CFLAGS) $(OSSLLIBS) $< $(LDFLAGS)
+
+buy: apps/buy.c sandwich
+	$(CC) -o apps/$@ $(FREEFARELIBS) $(CFLAGS) $(OSSLLIBS) $(LDFLAGS) $<
 
 ## Our own library
 setup: lib/setup.c include/sandwich/setup.h
