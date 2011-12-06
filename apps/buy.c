@@ -17,9 +17,9 @@ uint8_t k_tag_crypted[128];
 
 int main (int argc, char** argv)
 {
-	if (argc < 3)
+	if (argc != 3)
 	{
-		printf ("Usage:\n%s keys/global_private.pem keys\n", argv[0]);
+		printf ("Usage:\n%s keys/global_private.pem keys/shop_private.pem\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	nfc_device_t *device = NULL;
@@ -27,7 +27,7 @@ int main (int argc, char** argv)
 	int res;
 	size_t device_count;
 	MifareTag *tags = NULL;
-	nfc_device_desc_t devices;
+  nfc_device_desc_t devices;
 
 	nfc_list_devices (&devices, 1, &device_count);
 	if (!device_count)
@@ -66,65 +66,17 @@ int main (int argc, char** argv)
 	read = mifare_desfire_read_data (tags[0], 0x01, 0x00, 0x80, k_tag_crypted);
 	if (read < 0)
 		freefare_perror (tags[0], "Reading data");
-	else
-		printf ("Read %d bytes of data ...\n", read);
 
 	keyvault_t* kv = create_keyvault_new_empty ();
 	int keylen = 0;
 	RSA *private = load_key_from_file (argv[1], CRYPTO_PRIVATE);
+	RSA *shop_private = load_key_from_file (argv[2], CRYPTO_PRIVATE);
 	keylen = RSA_private_decrypt (read, (unsigned char *) k_tag_crypted, kv->k, private, RSA_PKCS1_PADDING);
-	printf ("Decrypted %d bytes of K\n", keylen);
 	if (keylen == 16)
 		set_keytype_3DES (kv, CRYPTO_KEY_K);
 
-	printf ("K is : ");
-	for (size_t i = 0; i < (size_t) keylen; i++)
-	{
-		printf ("%02x", kv->k[i]);
-	}
-	printf ("\n");
+	buy (tags[0], kv, "group_1", shop_private);
 
-	aid = mifare_desfire_aid_new (0x2);
-	res = mifare_desfire_select_application(tags[0], aid);
-	if (res < 0)
-		errx (EXIT_FAILURE, "Application selection failed");
-	free (aid);
-
-
-	char logentry[LOG_MAX_LEN + 2 + 6];
-	uint32_t counter = read_counter (tags[0], kv);
-	uint32_t _counter = (counter >= LOG_MAX_ENTRIES) ? LOG_MAX_ENTRIES : counter;
-	printf ("Read counter value of %u\n", counter);
-	struct tm tm;
-	char time[128];
-	char shop_name[LOG_MAX_SHOP_LEN];
-	uint32_t count;
-	unsigned char signature[128];
-	char shop_keyfile[255];
-
-	for (size_t i = 0; i < _counter; i++)
-	{
-		read_log_entry (tags[0], kv, i, logentry);
-		parse_logentry (logentry, &tm, shop_name, &count, signature);
-		sprintf(shop_keyfile, "%s/public_keys/%s.pem", argv[2], shop_name);
-		RSA *key = load_key_from_file (shop_keyfile, CRYPTO_PUBLIC);
-		int sigok = 0;
-		if (!key)
-		{
-			fprintf(stderr, "Could not find / open file for %s (%s)\n", shop_name, shop_keyfile);
-			continue;
-		}
-		else
-		{
-			unsigned int digestlen = LOG_PAYLOAD_LEN;
-			unsigned char *digest = digest_message ((uint8_t*) logentry, &digestlen);
-			sigok |= RSA_verify (NID_sha1, digest, digestlen, signature, RSA_size(key) , key);
-			free (digest);
-			free (key);
-		}
-		strftime (time, 128, "%x %X", &tm);
-		printf ("Entry #%lu:\n\tTime: %s\n\tShop: \"%s\"\n\tCount: %u\n\tSignature ok? %s\n", i, time, shop_name, count, (sigok)? "Yes": "No");
-	}
 
 	(void) error;
 	RSA_free (private);

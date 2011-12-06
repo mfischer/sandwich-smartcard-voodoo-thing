@@ -1,13 +1,16 @@
-CC=gcc
+CC=clang
 LD=ld.gold
+SC=swig
+PYTHON_VERSION=2.7
 CFLAGS=-Wall -std=c99 -Werror -O2 -isystem include -g
 LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: initialise-card analyse-card crypto-main log_test buy
+SWIGCFLAGS=$(shell pkg-config --cflags-only-I python-$(PYTHON_VERSION))
 
+default: initialise-card analyse-card crypto-main log_test buy swig-shop
 
 ## Our main applications
 initialise-card: apps/initialise_card.o sandwich keyvaults
@@ -50,6 +53,15 @@ shop: lib/shop.c include/sandwich/shop.h
 sandwich: crypto log setup shop
 	$(LD) -shared -o lib/libsandwich.so -lc lib/*.o $(OSSLLIBS) $(FREEFARELIBS)
 
+
+## The swig stuff
+swig-shop: swig/swig_shop.i swig/swig_shop.c
+	$(SC) -python $<
+	$(CC) -fPIC -c -o swig/swig_shop_wrap.o swig/swig_shop_wrap.c $(SWIGCFLAGS)
+	$(CC) -fPIC -c -o swig/swig_shop.o swig/swig_shop.c $(SWIGCFLAGS) $(CFLAGS)
+	$(LD) -shared -o swig/_swig_shop.so -lc swig/*.o $(OSSLLIBS) $(FREEFARELIBS) $(LDFLAGS)
+
+
 keyvaults:
 	-mkdir keyvaults
 
@@ -59,13 +71,19 @@ install:
 	cp apps/initialise-card $(INSTALL_PREFIX)/bin
 
 .PHONY: clean
-clean:
+clean: clean-swig
 	-rm apps/initialise-card
 	-rm apps/crypto-main
 	-rm apps/analyse-card
 	-rm apps/*.o
 	-rm lib/*.o
 	-rm lib/*.so
+
+.PHONY: clean-swig
+clean-swig:
+	-rm swig/swig_shop_wrap.c
+	-rm swig/swig_shop.py
+	-rm swig/swig_shop_wrap.o
 
 .PHONY: dist-clean
 dist-clean: clean
