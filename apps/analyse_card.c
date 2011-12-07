@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <err.h>
 #include <time.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include <nfc/nfc.h>
@@ -13,7 +14,7 @@
 
 uint8_t k_m_1[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 uint8_t k_tag[16]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-uint8_t k_tag_crypted[128];
+uint8_t k_tag_crypted[128+16];
 
 int main (int argc, char** argv)
 {
@@ -76,6 +77,11 @@ int main (int argc, char** argv)
 	printf ("Decrypted %d bytes of K\n", keylen);
 	if (keylen == 16)
 		set_keytype_3DES (kv, CRYPTO_KEY_K);
+	if (keylen < 0)
+	{
+		printf ("ERROR decrypting\n");
+		return EXIT_FAILURE;
+	}
 
 	printf ("K is : ");
 	for (size_t i = 0; i < (size_t) keylen; i++)
@@ -96,6 +102,7 @@ int main (int argc, char** argv)
 	uint32_t _counter = (counter >= LOG_MAX_ENTRIES) ? LOG_MAX_ENTRIES : counter;
 	printf ("Read counter value of %u\n", counter);
 	struct tm tm;
+	tm.tm_sec = 0;
 	char time[128];
 	char shop_name[LOG_MAX_SHOP_LEN];
 	uint32_t count;

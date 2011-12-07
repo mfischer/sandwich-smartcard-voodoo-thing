@@ -6,7 +6,7 @@ FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
 
-default: initialise-card analyse-card crypto-main log_test buy
+default: initialise-card analyse-card crypto-main buy
 
 
 ## Our main applications
