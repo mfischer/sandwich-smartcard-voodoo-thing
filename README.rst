@@ -28,6 +28,14 @@ After obtaining the code from tarball::
   user$: make
   user$: sudo make install
 
+Extracting the public keys
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In order to extract the public keys the tool 'extract-public-keys' in the subfolder 'tools' can be used. To invoke it ::
+
+  user$: ./tools/extract-public-keys directory-with-certs ca-file output-directory
+
+Each of the certificates will be verified using the given CA certificate. After invoking the command the extracted public keys in PEM format can  be found in 'output-directory/certs'.
+
 Running
 ~~~~~~~~
 Please note, you have to obtain the keys / certificates prior to running the application.

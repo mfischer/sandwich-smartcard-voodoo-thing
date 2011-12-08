@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ $# -lt 3 ]; then
+	echo "Usage ./extract-public-keys dir-with-certs ca-cert output-dir"
+else
+	echo 'Output directory is:' $3
+	mkdir -p $3/certs
+	for cert in $(find $1 -name '*.crt')
+	do
+		echo -n 'Verifying certificate'
+		openssl verify -CAfile $2 $cert
+		echo 'Extracting public key from certificate ' \'$cert\' '...'
+		openssl x509 -pubkey -noout -in $cert > $3/$(echo -n $cert | sed -e 's/crt/pem/g')
+	done
+fi
