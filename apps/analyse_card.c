@@ -4,6 +4,9 @@
 #include <time.h>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
+#include <dirent.h>
+
 
 #include <nfc/nfc.h>
 #include <freefare.h>
@@ -90,6 +93,43 @@ int main (int argc, char** argv)
 	}
 	printf ("\n");
 
+	unsigned char key_signature[128+16];
+	int sigok = 0;
+	read = mifare_desfire_read_data (tags[0], 0x02, 0x00, 0x80, key_signature);
+	if (read < 0)
+		freefare_perror (tags[0], "Reading data");
+
+	char keydir[NAME_MAX];
+	sprintf(keydir, "%s/public_keys", argv[2]);
+	DIR* dirp = opendir (keydir);
+	struct dirent* cur;
+
+	unsigned int digestlen = 128;
+	unsigned char *key_digest = digest_message ((uint8_t*) k_tag_crypted, &digestlen);
+	while ( (NULL != (cur = readdir(dirp))) )
+	{
+		if (cur->d_type == DT_REG)
+		{
+			char public_keyfile[255];
+			sprintf(public_keyfile, "%s/%s", keydir, cur->d_name);
+			RSA *key = load_key_from_file (public_keyfile, CRYPTO_PUBLIC);
+			if (key != NULL)
+			{
+				sigok |= RSA_verify (NID_sha1, key_digest, digestlen, key_signature, RSA_size(key) , key);
+				free (key);
+			}
+			if (sigok)
+			{
+				printf ("Signature on E(K) is valid (Keyfile '%s' matches) \n", public_keyfile);
+				break;
+			}
+		}
+	}
+	closedir(dirp);
+	free (key_digest);
+	if (!sigok)
+		printf ("Signature on E(K) is invalid!\n");
+
 	aid = mifare_desfire_aid_new (0x2);
 	res = mifare_desfire_select_application(tags[0], aid);
 	if (res < 0)
@@ -115,12 +155,12 @@ int main (int argc, char** argv)
 		parse_logentry (logentry, &tm, shop_name, &count, signature);
 		sprintf(shop_keyfile, "%s/public_keys/%s.pem", argv[2], shop_name);
 		RSA *key = load_key_from_file (shop_keyfile, CRYPTO_PUBLIC);
-		int sigok = 0;
+		sigok = 0;
 		if (!key)
 			fprintf(stderr, "Could not find / open file for %s (%s)\n", shop_name, shop_keyfile);
 		else
 		{
-			unsigned int digestlen = LOG_PAYLOAD_LEN;
+			digestlen = LOG_PAYLOAD_LEN;
 			unsigned char *digest = digest_message ((uint8_t*) logentry, &digestlen);
 			sigok |= RSA_verify (NID_sha1, digest, digestlen, signature, RSA_size(key) , key);
 			free (digest);
