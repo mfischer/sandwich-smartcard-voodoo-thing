@@ -75,7 +75,8 @@ int main (int argc, char** argv)
 	if (keylen == 16)
 		set_keytype_3DES (kv, CRYPTO_KEY_K);
 
-	buy (tags[0], kv, "group_1", shop_private);
+	if (buy (tags[0], kv, "group_1", shop_private))
+		printf ("This one is supposed to be free ;-)\n");
 
 
 	(void) error;
