@@ -69,7 +69,5 @@ class SandwichesWindow(Gtk.Window):
 
 if __name__ == '__main__':
     win = SandwichesWindow()
-    GLib.threads_init()
-    Gdk.threads_init()
     Gtk.main()
 
