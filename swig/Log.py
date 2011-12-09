@@ -23,12 +23,14 @@ class LogEntry:
                                                                                   self.shop_name, self.count,
                                                                                   self.sigok_str)
 
-def get_entries (pkey_filename, keydir):
+def get_entries (pkey_filename, keydir, callback):
     ret = list()
     count = swig_shop.read_counter_python (pkey_filename, keydir)
     print 'Counter value is: %u' % count
+    if count > 10: count = 10
     for i in range (count):
         print 'Reading #%u' % i
+        callback()
         entry, sigok, count = swig_shop.read_log_python (pkey_filename, keydir, i)
         if len(entry):
             ret.append(LogEntry(entry, sigok, i))
