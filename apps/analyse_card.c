@@ -31,7 +31,7 @@ int main (int argc, char** argv)
 	int res;
 	size_t device_count;
 	MifareTag *tags = NULL;
-  nfc_device_desc_t devices;
+	nfc_device_desc_t devices;
 
 	nfc_list_devices (&devices, 1, &device_count);
 	if (!device_count)
@@ -136,7 +136,7 @@ int main (int argc, char** argv)
 		errx (EXIT_FAILURE, "Application selection failed");
 	free (aid);
 
-	
+
 	char logentry[LOG_MAX_LEN + 2 + 6];
 	uint32_t counter = read_counter (tags[0], kv);
 	uint32_t _counter = (counter >= LOG_MAX_ENTRIES) ? LOG_MAX_ENTRIES : counter;
@@ -157,7 +157,10 @@ int main (int argc, char** argv)
 		RSA *key = load_key_from_file (shop_keyfile, CRYPTO_PUBLIC);
 		sigok = 0;
 		if (!key)
+		{
 			fprintf(stderr, "Could not find / open file for %s (%s)\n", shop_name, shop_keyfile);
+			continue;
+		}
 		else
 		{
 			digestlen = LOG_PAYLOAD_LEN;

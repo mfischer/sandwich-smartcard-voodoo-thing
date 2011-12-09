@@ -31,8 +31,10 @@ void update_counter (MifareTag tag, const keyvault_t *kv, uint32_t value)
 	ssize_t written = mifare_desfire_write_data (tag, 0x01, 0x0, 0x20, output);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
+	#ifdef DEBUG
 	else
 		printf ("Wrote %ld bytes to counter ...\n", written);
+	#endif
 }
 
 uint32_t read_counter (MifareTag tag, const keyvault_t *kv)
@@ -62,8 +64,11 @@ uint32_t read_counter (MifareTag tag, const keyvault_t *kv)
 	ssize_t read = mifare_desfire_read_data (tag, 0x1, 0x0, 0x20, output);
 	if (read < 0)
 		freefare_perror(tag, "Reading data from tag");
+
+	#ifdef DEBUG
 	else
 		printf ("Read %ld bytes from counter ...\n", read);
+	#endif
 
 	unsigned int ret;
 	sscanf (output, "%4u", &ret);
@@ -96,8 +101,10 @@ void write_log (MifareTag tag, const keyvault_t *kv, char *shop_name, uint32_t c
 	ssize_t written = mifare_desfire_write_data (tag, 0x02, LOG_MAX_LEN * ((count-1) % LOG_MAX_ENTRIES), LOG_MAX_LEN, data);
 	if (written < 0)
 		freefare_perror(tag, "Writing data to tag");
+	#ifdef DEBUG
 	else
 		printf ("Wrote %ld bytes to log ...\n", written);
+	#endif
 }
 
 void read_log_entry (MifareTag tag, const keyvault_t *kv, size_t number, char *logentry)
