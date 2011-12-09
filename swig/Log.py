@@ -25,10 +25,15 @@ class LogEntry:
 
 def get_entries (pkey_filename, keydir):
     ret = list()
-    for i in range (10):
+    count = swig_shop.read_counter_python (pkey_filename, keydir)
+    print 'Counter value is: %u' % count
+    for i in range (count):
         print 'Reading #%u' % i
         entry, sigok, count = swig_shop.read_log_python (pkey_filename, keydir, i)
-        ret.append(LogEntry(entry, sigok, i))
+        if len(entry):
+            ret.append(LogEntry(entry, sigok, i))
+        else:
+            print 'Somehow we read garbage ...'
     return ret
 
 def main ():
