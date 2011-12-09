@@ -68,6 +68,8 @@ install:
 	cp -r include $(INSTALL_PREFIX)
 	cp lib/libsandwich.so $(INSTALL_PREFIX)/lib
 	cp apps/initialise-card $(INSTALL_PREFIX)/bin
+	cp apps/analyse-card $(INSTALL_PREFIX)/bin
+	cp apps/buy $(INSTALL_PREFIX)/bin
 
 .PHONY: clean
 clean: clean-swig
