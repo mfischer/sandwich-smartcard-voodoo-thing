@@ -17,6 +17,8 @@ class SandwichesWindow(Gtk.Window):
         interface.add_from_file('interface.glade')
         
         self.label = interface.get_object("info_label")
+        self.progress = interface.get_object("progressbar")
+
         interface.connect_signals(self)
         
         self.sand_lab = []
@@ -37,23 +39,28 @@ class SandwichesWindow(Gtk.Window):
             lab = interface.get_object(l)
             self.sand_signatures.append(lab)
 
-
         
     def on_mainWindow_destroy(self, widget):
         Gtk.main_quit()
 
     def readCard(self, widget):
-        logs = Log.get_entries('../keys/global_private.pem', '../keys')
+        logs = Log.get_entries('../keys/global_private.pem', '../keys', self.incrementProgressBar)
         self.updateInfoText("Reading the card ...")
         for i in logs:
             self.updateSandwichText (i.num, i.shop_name)
             self.updateSandwichDate (i.num, '%02u/%02u/%02u %02u:%02u' % (i.month, i.day, i.year, i.hour, i.minute))
             self.updateSandwichSignature (i.num, i.sigok_str)
+            
         self.updateInfoText("Done reading the card")
+        self.resetProgressBar()
 
     def addSandwich(self, widget):
         swig_shop.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
         self.updateInfoText("Ok, sandwich added")
+
+    def incrementProgressBarButton(self,widget):
+        self.incrementProgressBar()
+        
         
     def updateInfoText(self, txt):
         self.label.set_label(txt)
@@ -66,6 +73,21 @@ class SandwichesWindow(Gtk.Window):
 
     def updateSandwichSignature(self, num, sig):
         label = self.sand_signatures[num].set_label(sig)
+        
+    def resetProgressBar(self):
+        self.progress.set_fraction(0.0)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+    def incrementProgressBar(self):
+        # current = self.progress.get_fraction()
+        # print("Fraction step %d" % current)
+        #self.progress.pulse()
+        current = self.progress.get_fraction()
+        self.progress.set_fraction(current + 0.1)
+       
+        while Gtk.events_pending():
+            Gtk.main_iteration()
 
 if __name__ == '__main__':
     win = SandwichesWindow()

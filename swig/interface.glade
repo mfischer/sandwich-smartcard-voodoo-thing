@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="main_window">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Fidelity Card Controler</property>
-    <property name="window_position">center</property>
+    <property name="halign">center</property>
+    <property name="valign">center</property>
+    <property name="margin_left">10</property>
+    <property name="margin_right">10</property>
+    <property name="margin_top">10</property>
+    <property name="margin_bottom">10</property>
+    <property name="border_width">10</property>
+    <property name="title" translatable="yes">Fidelity Card Controller</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
     <property name="icon_name">applications-utilities</property>
+    <property name="gravity">center</property>
     <signal name="destroy" handler="on_mainWindow_destroy" swapped="no"/>
     <child>
       <object class="GtkTable" id="table">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="n_rows">3</property>
+        <property name="n_rows">4</property>
         <property name="n_columns">2</property>
         <property name="column_spacing">4</property>
         <property name="row_spacing">5</property>
         <child>
           <object class="GtkButton" id="button1">
             <property name="label">gtk-refresh</property>
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -35,7 +42,6 @@
         <child>
           <object class="GtkButton" id="button2">
             <property name="label">gtk-add</property>
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -46,22 +52,6 @@
           <packing>
             <property name="left_attach">1</property>
             <property name="top_attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="info_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Please put your card on the reader and then
-press 'Read card' to check if the client can have
-a free sandwich.
-After press 'Log a sandwich' to add a sandwich
-to the card, even for a free one !</property>
-            <property name="width_chars">42</property>
-          </object>
-          <packing>
-            <property name="bottom_attach">2</property>
-            <property name="y_options"></property>
           </packing>
         </child>
         <child>
@@ -703,6 +693,60 @@ to the card, even for a free one !</property>
             <property name="right_attach">2</property>
             <property name="top_attach">2</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="progressbar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="text" translatable="yes">Reading...</property>
+          </object>
+          <packing>
+            <property name="top_attach">3</property>
+            <property name="bottom_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkImage" id="image1">
+                <property name="width_request">30</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixbuf">sandwich.png</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="info_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Please put your card on the reader and then
+press 'Refresh' to check if the client can have
+a free sandwich.
+After press 'Add' to add a sandwich
+to the card, even for a free one !</property>
+                <property name="width_chars">42</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="bottom_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
