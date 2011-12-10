@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
-import Log
-import swig_shop
+from sandwich import Log
 
 try:
     from gi.repository import Gtk, Gdk, GLib

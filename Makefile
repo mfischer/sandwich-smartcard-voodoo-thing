@@ -7,7 +7,13 @@ LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
-SWIGCFLAGS=$(shell pkg-config --cflags-only-I python-$(PYTHON_VERSION))
+SWIGCFLAGS=$(shell python2-config --includes)
+
+ifdef DESTDIR
+	INSTALL_PREFIX=${DESTDIR}
+else
+	INSTALL_PREFIX=/usr/local
+endif
 
 default: initialise-card analyse-card crypto-main log_test buy swig-shop
 
@@ -55,19 +61,27 @@ sandwich: crypto log setup shop
 
 ## The swig stuff
 swig-shop: swig/swig_shop.i swig/swig_shop.c
-	$(SC) -python $<
+	$(SC) -python -outdir swig/sandwich $<
 	$(CC) -fPIC -c -o swig/swig_shop_wrap.o swig/swig_shop_wrap.c $(SWIGCFLAGS)
 	$(CC) -fPIC -c -o swig/swig_shop.o swig/swig_shop.c $(SWIGCFLAGS) $(CFLAGS)
-	$(LD) -shared -o swig/_swig_shop.so -lc swig/*.o $(OSSLLIBS) $(FREEFARELIBS) $(LDFLAGS)
+	$(LD) -shared -o swig/sandwich/_swig_shop.so -lc swig/*.o $(OSSLLIBS) $(FREEFARELIBS) $(LDFLAGS)
 
 
 keyvaults:
 	-mkdir keyvaults
 
-install:
-	cp -r include $(INSTALL_PREFIX)
-	cp lib/libsandwich.so $(INSTALL_PREFIX)/lib
-	cp apps/initialise-card $(INSTALL_PREFIX)/bin
+install: default
+	install -d include/sandwich $(INSTALL_PREFIX)/include/sandwich
+	install include/sandwich/*h $(INSTALL_PREFIX)/include/sandwich
+	install -d lib $(INSTALL_PREFIX)/lib
+	install lib/libsandwich.so $(INSTALL_PREFIX)/lib
+	install -d swig/sandwich $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages
+	install swig/sandwich/__init__.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	install swig/sandwich/Log.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	install swig/sandwich/_swig_shop.so $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	install apps/initialise-card $(INSTALL_PREFIX)/bin
+	install apps/analyse-card $(INSTALL_PREFIX)/bin
+	install apps/buy $(INSTALL_PREFIX)/bin
 
 .PHONY: clean
 clean: clean-swig
@@ -81,7 +95,7 @@ clean: clean-swig
 .PHONY: clean-swig
 clean-swig:
 	-rm swig/swig_shop_wrap.c
-	-rm swig/swig_shop.py
+	-rm swig/sandwich/swig_shop.py
 	-rm swig/swig_shop_wrap.o
 
 .PHONY: dist-clean
