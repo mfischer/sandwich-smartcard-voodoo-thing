@@ -135,7 +135,7 @@ int buy (MifareTag tag, const keyvault_t *kv, char *shop_name , RSA *shop_privat
 	uint32_t count = read_counter (tag, kv);
 	update_counter (tag, kv, count + 1);
 	write_log (tag, kv, shop_name, count +1, shop_private);
-	if (count > LOG_MAX_ENTRIES && (count % LOG_MAX_ENTRIES == 1))
+	if (!(count % 10))
 		return 1;
 	else
 		return 0;

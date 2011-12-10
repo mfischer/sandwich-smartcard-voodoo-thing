@@ -1,5 +1,5 @@
-CC=clang
-LD=ld.gold
+CC=gcc
+LD=ld
 CFLAGS=-Wall -std=gnu99 -Werror -O2 -isystem include -g
 SC=swig
 PYTHON_VERSION=2.7
@@ -7,7 +7,17 @@ LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
-SWIGCFLAGS=$(shell pkg-config --cflags-only-I python-$(PYTHON_VERSION))
+SWIGCFLAGS=$(shell python-config --includes)
+
+ifdef DESTDIR
+	INSTALL_PREFIX=${DESTDIR}
+else
+	INSTALL_PREFIX=/usr/local
+endif
+
+ifndef RESOURCE_PATH
+	RESOURCE_PATH=${INSTALL_PREFIX}
+endif
 
 default: initialise-card analyse-card crypto-main log_test buy swig-shop
 
@@ -55,21 +65,30 @@ sandwich: crypto log setup shop
 
 ## The swig stuff
 swig-shop: swig/swig_shop.i swig/swig_shop.c
-	$(SC) -python $<
+	$(SC) -python -outdir swig/sandwich $<
 	$(CC) -fPIC -c -o swig/swig_shop_wrap.o swig/swig_shop_wrap.c $(SWIGCFLAGS)
 	$(CC) -fPIC -c -o swig/swig_shop.o swig/swig_shop.c $(SWIGCFLAGS) $(CFLAGS)
-	$(LD) -shared -o swig/_swig_shop.so -lc swig/*.o $(OSSLLIBS) $(FREEFARELIBS) $(LDFLAGS)
+	$(LD) -shared -o swig/sandwich/_swig_shop.so -lc swig/*.o $(OSSLLIBS) $(FREEFARELIBS) $(LDFLAGS)
 
 
 keyvaults:
 	-mkdir keyvaults
 
-install:
-	cp -r include $(INSTALL_PREFIX)
-	cp lib/libsandwich.so $(INSTALL_PREFIX)/lib
-	cp apps/initialise-card $(INSTALL_PREFIX)/bin
-	cp apps/analyse-card $(INSTALL_PREFIX)/bin
-	cp apps/buy $(INSTALL_PREFIX)/bin
+install: default
+	test -d ${INSTALL_PREFIX}/include/sandwich || mkdir -p ${INSTALL_PREFIX}/include/sandwich
+	install include/sandwich/*.h $(INSTALL_PREFIX)/include/sandwich
+	test -d ${INSTALL_PREFIX}/lib || mkdir ${INSTALL_PREFIX}/lib
+	install lib/libsandwich.so $(INSTALL_PREFIX)/lib
+	test -d ${INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages/sandwich || mkdir -p ${INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	install swig/sandwich/*.{py,so} $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich/
+	test -d ${INSTALL_PREFIX}/bin || mkdir ${INSTALL_PREFIX}/bin
+	install apps/{initialise-card,analyse-card,buy} $(INSTALL_PREFIX)/bin
+	test -d ${INSTALL_PREFIX}/share/sandwich || mkdir -p ${INSTALL_PREFIX}/share/sandwich
+	install swig/interface.glade ${INSTALL_PREFIX}/share/sandwich
+	sed -i -e 's#sandwich.png#${RESOURCE_PATH}/sandwich.png#g' ${INSTALL_PREFIX}/share/sandwich/interface.glade
+	install swig/sandwich.png ${INSTALL_PREFIX}/share/sandwich
+	install swig/nice_gui.py ${INSTALL_PREFIX}/bin/sandwich-shop
+	sed -i -e 's#interface.glade#${RESOURCE_PATH}/interface.glade#g' ${INSTALL_PREFIX}/bin/sandwich-shop
 
 .PHONY: clean
 clean: clean-swig
@@ -83,7 +102,7 @@ clean: clean-swig
 .PHONY: clean-swig
 clean-swig:
 	-rm swig/swig_shop_wrap.c
-	-rm swig/swig_shop.py
+	-rm swig/sandwich/swig_shop.py
 	-rm swig/swig_shop_wrap.o
 
 .PHONY: dist-clean
