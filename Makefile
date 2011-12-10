@@ -72,17 +72,13 @@ keyvaults:
 
 install: default
 	install -d include/sandwich $(INSTALL_PREFIX)/include/sandwich
-	install include/sandwich/*h $(INSTALL_PREFIX)/include/sandwich
-	install -d lib $(INSTALL_PREFIX)/lib
+	install include/sandwich/*.h $(INSTALL_PREFIX)/include/sandwich
+	test -d ${INSTALL_PREFIX}/lib || mkdir ${INSTALL_PREFIX}/lib
 	install lib/libsandwich.so $(INSTALL_PREFIX)/lib
-	install -d swig/sandwich $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages
-	install swig/sandwich/__init__.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
-	install swig/sandwich/Log.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
-	install swig/sandwich/_swig_shop.so $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	test -d ${INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages/sandwich || mkdir -p ${INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages/sandwich
+	install swig/sandwich/*.{py,so} $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich/
 	test -d ${INSTALL_PREFIX}/bin || mkdir ${INSTALL_PREFIX}/bin
-	install apps/initialise-card $(INSTALL_PREFIX)/bin/initialise-card
-	install apps/analyse-card $(INSTALL_PREFIX)/bin/analyse-card
-	install apps/buy $(INSTALL_PREFIX)/bin/buy
+	install apps/{initialise-card,analyse-card,buy} $(INSTALL_PREFIX)/bin
 
 .PHONY: clean
 clean: clean-swig
