@@ -79,9 +79,10 @@ install: default
 	install swig/sandwich/__init__.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
 	install swig/sandwich/Log.py $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
 	install swig/sandwich/_swig_shop.so $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich
-	install apps/initialise-card $(INSTALL_PREFIX)/bin
-	install apps/analyse-card $(INSTALL_PREFIX)/bin
-	install apps/buy $(INSTALL_PREFIX)/bin
+	test -d ${INSTALL_PREFIX}/bin || mkdir ${INSTALL_PREFIX}/bin
+	install apps/initialise-card $(INSTALL_PREFIX)/bin/initialise-card
+	install apps/analyse-card $(INSTALL_PREFIX)/bin/analyse-card
+	install apps/buy $(INSTALL_PREFIX)/bin/buy
 
 .PHONY: clean
 clean: clean-swig
