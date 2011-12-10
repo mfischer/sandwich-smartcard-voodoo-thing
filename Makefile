@@ -79,6 +79,10 @@ install: default
 	install swig/sandwich/*.{py,so} $(INSTALL_PREFIX)/lib/python${PYTHON_VERSION}/site-packages/sandwich/
 	test -d ${INSTALL_PREFIX}/bin || mkdir ${INSTALL_PREFIX}/bin
 	install apps/{initialise-card,analyse-card,buy} $(INSTALL_PREFIX)/bin
+	test -d ${INSTALL_PREFIX}/share/sandwich || mkdir -p ${INSTALL_PREFIX}/share/sandwich
+	install swig/interface.glade ${INSTALL_PREFIX}/share/sandwich
+	install swig/nice_gui.py ${INSTALL_PREFIX}/bin/sandwich_shop
+	sed -i -e 's#interface.glade#${INSTALL_PREFIX}/share/sandwich/interface.glade#g' ${INSTALL_PREFIX}/bin/sandwich_shop
 
 .PHONY: clean
 clean: clean-swig

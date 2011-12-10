@@ -58,7 +58,7 @@ class SandwichesWindow(Gtk.Window):
         self.resetProgressBar()
 
     def addSandwich(self, widget):
-        swig_shop.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
+        sandwich.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
         self.updateInfoText("Ok, sandwich added")
 
     def incrementProgressBarButton(self,widget):
