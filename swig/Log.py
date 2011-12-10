@@ -26,22 +26,22 @@ class LogEntry:
 def get_entries (pkey_filename, keydir, callback):
     ret = list()
     count = swig_shop.read_counter_python (pkey_filename, keydir)
-    print 'Counter value is: %u' % count
+    print ('Counter value is: %u' % count)
     if count > 10: count = 10
     for i in range (count):
-        print 'Reading #%u' % i
+        print ('Reading #%u' % i)
         callback()
         entry, sigok, count = swig_shop.read_log_python (pkey_filename, keydir, i)
         if len(entry):
             ret.append(LogEntry(entry, sigok, i))
         else:
-            print 'Somehow we read garbage ...'
+            print ('Somehow we read garbage ...')
     return ret
 
 def main ():
     log = get_entries ('../keys/global_private.pem', '../keys')
     for e in log:
-        print e
+        print (e)
 
 
 if __name__ == '__main__':
