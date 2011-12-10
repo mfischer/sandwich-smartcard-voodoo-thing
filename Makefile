@@ -15,6 +15,10 @@ else
 	INSTALL_PREFIX=/usr/local
 endif
 
+ifndef RESOURCE_PATH
+	RESOURCE_PATH=${DESTDIR}
+endif
+
 default: initialise-card analyse-card crypto-main log_test buy swig-shop
 
 ## Our main applications
@@ -81,8 +85,10 @@ install: default
 	install apps/{initialise-card,analyse-card,buy} $(INSTALL_PREFIX)/bin
 	test -d ${INSTALL_PREFIX}/share/sandwich || mkdir -p ${INSTALL_PREFIX}/share/sandwich
 	install swig/interface.glade ${INSTALL_PREFIX}/share/sandwich
-	install swig/nice_gui.py ${INSTALL_PREFIX}/bin/sandwich_shop
-	sed -i -e 's#interface.glade#${INSTALL_PREFIX}/share/sandwich/interface.glade#g' ${INSTALL_PREFIX}/bin/sandwich_shop
+	sed -i -e 's#sandwich.png#${RESOURCE_PATH}/sandwich.png#g' ${INSTALL_PREFIX}/share/sandwich/interface.glade
+	install swig/sandwich.png ${INSTALL_PREFIX}/share/sandwich
+	install swig/nice_gui.py ${INSTALL_PREFIX}/bin/sandwich-shop
+	sed -i -e 's#interface.glade#${RESOURCE_PATH}/interface.glade#g' ${INSTALL_PREFIX}/bin/sandwich-shop
 
 .PHONY: clean
 clean: clean-swig
