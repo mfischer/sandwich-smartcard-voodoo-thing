@@ -7,7 +7,7 @@ LDFLAGS=-L lib -lpthread -lsandwich
 FREEFARECFLAGS=$(shell pkg-config --cflags libfreefare)
 FREEFARELIBS=$(shell pkg-config --libs-only-l libfreefare)
 OSSLLIBS=$(shell pkg-config --libs-only-l openssl)
-SWIGCFLAGS=$(shell python2-config --includes)
+SWIGCFLAGS=$(shell python-config --includes)
 
 ifdef DESTDIR
 	INSTALL_PREFIX=${DESTDIR}
