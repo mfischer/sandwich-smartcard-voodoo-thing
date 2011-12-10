@@ -16,7 +16,7 @@ else
 endif
 
 ifndef RESOURCE_PATH
-	RESOURCE_PATH=${DESTDIR}
+	RESOURCE_PATH=${INSTALL_PREFIX}
 endif
 
 default: initialise-card analyse-card crypto-main log_test buy swig-shop
@@ -75,7 +75,7 @@ keyvaults:
 	-mkdir keyvaults
 
 install: default
-	install -d include/sandwich $(INSTALL_PREFIX)/include/sandwich
+	test -d ${INSTALL_PREFIX}/include/sandwich || mkdir -p ${INSTALL_PREFIX}/include/sandwich
 	install include/sandwich/*.h $(INSTALL_PREFIX)/include/sandwich
 	test -d ${INSTALL_PREFIX}/lib || mkdir ${INSTALL_PREFIX}/lib
 	install lib/libsandwich.so $(INSTALL_PREFIX)/lib
