@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+import argparse
+import os
+import sys
 from sandwich import Log
 
 try:
@@ -11,14 +14,17 @@ except:
 
 class SandwichesWindow(Gtk.Window):
 
-    def __init__(self):
+    def __init__(self, global_private, shop_private, keydir, shop_name):
         interface = Gtk.Builder()
         interface.add_from_file('interface.glade')
         
         self.label = interface.get_object("info_label")
         self.progress = interface.get_object("progressbar")
         self.progress.set_show_text("")
-
+        self.global_private = global_private
+        self.shop_private = shop_private
+        self.keydir = keydir
+        self.shop_name = shop_name
 
         interface.connect_signals(self)
         
@@ -47,7 +53,7 @@ class SandwichesWindow(Gtk.Window):
     def readCard(self, widget):
         self.resetProgressBar()
         self.progress.set_show_text("Reading...")
-        logs = Log.get_entries('../keys/global_private.pem', '../keys', self.incrementProgressBar)
+        logs = Log.get_entries(self.global_private, self.keydir, self.incrementProgressBar)
         self.updateInfoText("Reading the card ...")
         for i in logs:
             self.updateSandwichText (i.num, i.shop_name)
@@ -58,7 +64,7 @@ class SandwichesWindow(Gtk.Window):
         self.resetProgressBar()
 
     def addSandwich(self, widget):
-        sandwich.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
+        sandwich.buy_python (self.global_private, self.shop_private, self.shop_name)
         self.updateInfoText("Ok, sandwich added")
 
     def incrementProgressBarButton(self,widget):
@@ -84,9 +90,6 @@ class SandwichesWindow(Gtk.Window):
         self.progress.set_show_text("")
 
     def incrementProgressBar(self):
-        # current = self.progress.get_fraction()
-        # print("Fraction step %d" % current)
-        #self.progress.pulse()
         current = self.progress.get_fraction()
         self.progress.set_fraction(current + 0.1)
        
@@ -94,6 +97,21 @@ class SandwichesWindow(Gtk.Window):
             Gtk.main_iteration()
 
 if __name__ == '__main__':
-    win = SandwichesWindow()
+    parser = argparse.ArgumentParser(description="Shop's GUI")
+    parser.add_argument ('--keydir', type=str, default='../keys')
+    parser.add_argument ('--global-private-key', type=str, default='../keys/global_private.pem')
+    parser.add_argument ('--shop-private-key', type=str, default='../keys/shop_private.pem')
+    parser.add_argument ('--shop-name', type=str, default='group_1')
+    args = parser.parse_args()
+
+    if not os.path.exists(os.path.join(args.keydir,'public_keys')):
+        print ('[Warn]  Public key dir was not found at %s, did you extract them there? Signatures cannot be verified like this!'
+                % os.path.join(args.keydir, 'public_keys'))
+    for i in [args.global_private_key, args.shop_private_key]:
+        if not os.path.exists(i):
+            print ("[Error] Could not find %s" % i)
+            sys.exit(1)
+
+    win = SandwichesWindow(args.global_private_key, args.shop_private_key, args.keydir, args.shop_name)
     Gtk.main()
 
