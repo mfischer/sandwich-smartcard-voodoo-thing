@@ -71,3 +71,13 @@ To increase the counter / buy a sandwich, type::
 
 Where global_private.pem denotes the file containing the private key known to all shops, and shop_private.pem the key known to the shop where
 the sandwich is about to be bought.
+
+Graphical version
+-----------------
+We also designed a more user-friendly version of the software. (It requires Python 2.7 and gtk3 bindings for Python.)
+
+To use the graphical version::
+
+	user$: cd swig
+	user$: python nice_gui.py
+
