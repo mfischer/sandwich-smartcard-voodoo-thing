@@ -54,8 +54,9 @@ class SandwichesWindow(Gtk.Window):
             self.updateSandwichText (i.num, i.shop_name)
             self.updateSandwichDate (i.num, '%02u/%02u/%02u %02u:%02u' % (i.month, i.day, i.year, i.hour, i.minute))
             self.updateSandwichSignature (i.num, i.sigok_str)
-            
-        self.updateInfoText("Done reading the card")
+	counter = swig_shop.read_counter_python('../keys/global_private.pem', '../keys/shop_private.pem')        
+
+        self.updateInfoText(str(counter) + " sandwiches on the card!")
         self.resetProgressBar()
 
     def addSandwich(self, widget):
