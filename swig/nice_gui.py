@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 from sandwich import Log
+from sandwich import swig_shop
 
 try:
     from gi.repository import Gtk, Gdk, GLib
@@ -20,11 +21,11 @@ class SandwichesWindow(Gtk.Window):
         
         self.label = interface.get_object("info_label")
         self.progress = interface.get_object("progressbar")
-        self.progress.set_show_text("")
         self.global_private = global_private
         self.shop_private = shop_private
         self.keydir = keydir
         self.shop_name = shop_name
+        self.progress.set_text("")
 
         interface.connect_signals(self)
         
@@ -52,15 +53,16 @@ class SandwichesWindow(Gtk.Window):
 
     def readCard(self, widget):
         self.resetProgressBar()
-        self.progress.set_show_text("Reading...")
+        self.progress.set_text("Reading...")
         logs = Log.get_entries(self.global_private, self.keydir, self.incrementProgressBar)
         self.updateInfoText("Reading the card ...")
         for i in logs:
             self.updateSandwichText (i.num, i.shop_name)
             self.updateSandwichDate (i.num, '%02u/%02u/%02u %02u:%02u' % (i.month, i.day, i.year, i.hour, i.minute))
             self.updateSandwichSignature (i.num, i.sigok_str)
-            
-        self.updateInfoText("Done reading the card")
+        counter = swig_shop.read_counter_python(self.global_private, self.shop_private)
+
+        self.updateInfoText(str(counter) + " sandwiches on the card!")
         self.resetProgressBar()
 
     def addSandwich(self, widget):
@@ -87,7 +89,7 @@ class SandwichesWindow(Gtk.Window):
         self.progress.set_fraction(0.0)
         while Gtk.events_pending():
             Gtk.main_iteration()
-        self.progress.set_show_text("")
+        self.progress.set_text("")
 
     def incrementProgressBar(self):
         current = self.progress.get_fraction()
