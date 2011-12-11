@@ -18,7 +18,7 @@ class SandwichesWindow(Gtk.Window):
         
         self.label = interface.get_object("info_label")
         self.progress = interface.get_object("progressbar")
-        self.progress.set_show_text("")
+        self.progress.set_text("")
 
 
         interface.connect_signals(self)
@@ -47,7 +47,7 @@ class SandwichesWindow(Gtk.Window):
 
     def readCard(self, widget):
         self.resetProgressBar()
-        self.progress.set_show_text("Reading...")
+        self.progress.set_text("Reading...")
         logs = Log.get_entries('../keys/global_private.pem', '../keys', self.incrementProgressBar)
         self.updateInfoText("Reading the card ...")
         for i in logs:
@@ -83,7 +83,7 @@ class SandwichesWindow(Gtk.Window):
         self.progress.set_fraction(0.0)
         while Gtk.events_pending():
             Gtk.main_iteration()
-        self.progress.set_show_text("")
+        self.progress.set_text("")
 
     def incrementProgressBar(self):
         # current = self.progress.get_fraction()
