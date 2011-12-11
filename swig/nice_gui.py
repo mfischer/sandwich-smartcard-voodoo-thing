@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 from sandwich import Log
+from sandwich import swig_shop
 
 try:
     from gi.repository import Gtk, Gdk, GLib
@@ -58,7 +59,7 @@ class SandwichesWindow(Gtk.Window):
         self.resetProgressBar()
 
     def addSandwich(self, widget):
-        sandwich.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
+        swig_shop.buy_python ('../keys/global_private.pem', '../keys/shop_private.pem', 'group_1')
         self.updateInfoText("Ok, sandwich added")
 
     def incrementProgressBarButton(self,widget):
